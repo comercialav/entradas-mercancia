@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entradas de mercancía</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Neutros */
+            --color-bg: #F9FAFB;
+            --color-surface: #FFFFFF;
+            --color-border-subtle: #E5E7EB;
+            --color-border-strong: #D1D5DB;
+            --color-text-primary: #111827;
+            --color-text-secondary: #6B7280;
+            --color-text-muted: #9CA3AF;
+
+            /* Azul corporativo */
+            --color-primary: #2F8EDB;
+            --color-primary-light: #5FB0F1;
+            --color-primary-dark: #1E6EAD;
+
+            /* Estados */
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-error: #EF4444;
+
+            /* Sombra y Radio */
+            --shadow-soft: 0 8px 20px rgba(15, 23, 42, 0.06);
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-pill: 999px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text-primary);
+        }
+        .table-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-scrollbar::-webkit-scrollbar-track {
+            background-color: #f1f1f1;
+        }
+        .table-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #D1D5DB;
+            border-radius: 10px;
+        }
+        .table-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #9CA3AF;
+        }
+        /* Ocultar flechas de input numérico */
+        input[type='number']::-webkit-inner-spin-button,
+        input[type='number']::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type='number'] {
+            -moz-appearance: textfield;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>

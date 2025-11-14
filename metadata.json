@@ -1,0 +1,6 @@
+
+{
+  "name": "Entradas de mercancía",
+  "description": "Una aplicación interna para mejorar la comunicación entre los departamentos de compras y almacén, permitiendo el seguimiento de las llegadas de proveedores desde la previsión hasta el registro final.",
+  "requestFramePermissions": []
+}
