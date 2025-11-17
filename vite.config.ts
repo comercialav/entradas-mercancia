@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', 'PROOVEDORES_AV_');
     return {
+      envPrefix: 'PROOVEDORES_AV_', // Permite que Vite exponga variables con este prefijo al cliente
       server: {
         port: 3000,
         host: '0.0.0.0',
