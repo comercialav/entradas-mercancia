@@ -67,7 +67,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     <div className="mb-8">
                         <img src={logoBlue} alt="AV" className="h-12 w-12 object-contain" />
                         <h1 className="mt-4 text-3xl font-bold text-[--color-text-primary]">Acceso interno</h1>
-                        <p className="mt-2 text-[--color-text-secondary]">Entradas de mercancia · Compras y Almacén</p>
+                        <p className="mt-2 text-[--color-text-secondary]">Entradas de mercancía · Compras y Almacén</p>
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-6">
@@ -148,7 +148,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                         </div>
                     </form>
                     <p className="mt-8 text-center text-xs text-gray-500">
-                        Solo para uso interno del personal autorizado.
+                        Sólo para uso interno del personal autorizado.
                     </p>
                 </div>
             </div>
@@ -158,7 +158,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                  <div className="max-w-md text-center">
                     <img src={logoBlue} alt="AV" className="h-32 w-32 mx-auto object-contain" />
                     <h2 className="mt-8 text-4xl font-bold text-[--color-text-primary]">
-                        Entradas de mercancia
+                        Entradas de mercancía
                     </h2>
                     <p className="mt-4 text-lg text-[--color-text-secondary]">
                         Sincroniza Compras y Almacén en tiempo real. Previsiones, llegadas y altas de forma sencilla y centralizada.
