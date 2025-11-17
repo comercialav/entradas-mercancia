@@ -1,11 +1,56 @@
-build:
-  commands:
-    - npm install
-    - npm run build
+# Environment variables and secrets
+env:
+  # Firebase configuration (required)
+  - variable: VITE_FIREBASE_API_KEY
+    value: "AIzaSyA4sJtWJc1Zox5xyiiwML9yi9ez8nJogT0"
+    availability:
+      - BUILD
+      - RUNTIME
 
-run:
-  command: npm start
-  env:
-    - variable: PORT
-      value: "8080"
+  - variable: VITE_FIREBASE_AUTH_DOMAIN
+    value: "entradas-63f0e.firebaseapp.com"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: VITE_FIREBASE_PROJECT_ID
+    value: "entradas-63f0e"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: VITE_FIREBASE_STORAGE_BUCKET
+    value: "entradas-63f0e.firebasestorage.app"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: VITE_FIREBASE_MESSAGING_SENDER_ID
+    value: "752789962386"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: VITE_FIREBASE_APP_ID
+    value: "1:752789962386:web:6c20c85bb33194e970304b"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Notifications endpoint (optional)
+  - variable: VITE_NOTIFY_ENDPOINT
+    value: "https://us-central1-entradas-63f0e.cloudfunctions.net/notify"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: VITE_DISABLE_NOTIFICATIONS
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME
+# Override build and run commands if needed
+# scripts:
+#   buildCommand: npm run build
+#   runCommand: npm start
 
