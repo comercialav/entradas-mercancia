@@ -1,3 +1,11 @@
+build:
+  commands:
+    - npm install
+    - npm run build
+
 run:
   command: npm start
+  env:
+    - variable: PORT
+      value: "8080"
 
