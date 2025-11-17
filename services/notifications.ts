@@ -16,10 +16,10 @@ export interface NotificationRequestPayload {
     island: IslandCode;
 }
 
-const NOTIFY_ENDPOINT = import.meta.env.VITE_NOTIFY_ENDPOINT;
+const NOTIFY_ENDPOINT = import.meta.env.PROOVEDORES_AV_NOTIFY_ENDPOINT;
 
 export async function notifyServer(action: NotificationAction, payload: NotificationRequestPayload) {
-    if (!NOTIFY_ENDPOINT || import.meta.env.VITE_DISABLE_NOTIFICATIONS === 'true') {
+    if (!NOTIFY_ENDPOINT || import.meta.env.PROOVEDORES_AV_DISABLE_NOTIFICATIONS === 'true') {
         if (import.meta.env.DEV) {
             console.info('[notify] Notifications disabled. Skipping email trigger for action', action);
         }

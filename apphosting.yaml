@@ -1,0 +1,51 @@
+# Environment variables and secrets
+env:
+  # Firebase configuration (required) - Using Cloud Secret Manager
+  - variable: PROOVEDORES_AV_FIREBASE_API_KEY
+    secret: firebase-api-key
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: PROOVEDORES_AV_FIREBASE_AUTH_DOMAIN
+    secret: firebase-auth-domain
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: PROOVEDORES_AV_FIREBASE_PROJECT_ID
+    value: "entradas-63f0e" # No es sensible, puede estar en código
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: PROOVEDORES_AV_FIREBASE_STORAGE_BUCKET
+    value: "entradas-63f0e.firebasestorage.app" # No es sensible, puede estar en código
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: PROOVEDORES_AV_FIREBASE_MESSAGING_SENDER_ID
+    secret: firebase-messaging-sender-id
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: PROOVEDORES_AV_FIREBASE_APP_ID
+    secret: firebase-app-id
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Notifications endpoint (optional)
+  - variable: PROOVEDORES_AV_NOTIFY_ENDPOINT
+    value: "https://us-central1-entradas-63f0e.cloudfunctions.net/notify" # URL pública, no es sensible
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: PROOVEDORES_AV_DISABLE_NOTIFICATIONS
+    value: "false" # No es sensible
+    availability:
+      - BUILD
+      - RUNTIME
