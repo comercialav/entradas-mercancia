@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Delivery, UserRole, DeliveryStatus } from '../../../types';
 import { CloseIcon, CalendarIcon, TruckIcon, CheckCircleIcon } from '../../ui/Icons';
 import { StatusBadge } from './StatusBadge';
@@ -33,10 +33,24 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
     const [pallets, setPallets] = useState(delivery.pallets?.toString() ?? '');
     const [packages, setPackages] = useState(delivery.packages?.toString() ?? '');
     const [observations, setObservations] = useState(delivery.observations ?? '');
+    const [tracking, setTracking] = useState(delivery.tracking ?? '');
+    const [notes, setNotes] = useState(delivery.notes ?? '');
     const [confirmAction, setConfirmAction] = useState<'alta' | null>(null);
     const [isSavingWarehouse, setIsSavingWarehouse] = useState(false);
+    const [isSavingPurchases, setIsSavingPurchases] = useState(false);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Actualizar estados cuando cambie el delivery
+    useEffect(() => {
+        setArrival(delivery.arrival ? delivery.arrival.substring(0, 16) : '');
+        setPallets(delivery.pallets?.toString() ?? '');
+        setPackages(delivery.packages?.toString() ?? '');
+        setObservations(delivery.observations ?? '');
+        setTracking(delivery.tracking ?? '');
+        setNotes(delivery.notes ?? '');
+        setError(null);
+    }, [delivery.id]);
 
     const handleSaveWarehouseData = async () => {
         setError(null);
@@ -59,6 +73,26 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
             setError('No se pudo guardar la información del almacén.');
         } finally {
             setIsSavingWarehouse(false);
+        }
+    };
+
+    const handleSavePurchasesData = async () => {
+        setError(null);
+        setIsSavingPurchases(true);
+        console.info('[slideOver] Guardando datos de compras para', delivery.id);
+        try {
+            await onUpdateDelivery({
+                ...delivery,
+                tracking: tracking.trim() || null,
+                notes: notes.trim() || null,
+            });
+            console.info('[slideOver] Datos de compras guardados correctamente');
+            onClose();
+        } catch (err) {
+            console.error(err);
+            setError('No se pudo guardar la información de compras.');
+        } finally {
+            setIsSavingPurchases(false);
         }
     };
 
@@ -103,7 +137,41 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                         <TimelineStep icon={<CheckCircleIcon/>} title="Dado de Alta" value={null} isCompleted={delivery.status === 'Dado de alta'} isLast={true} />
                     </div>
 
-                    {userRole === 'Compras' && (
+                    {userRole === 'Compras' && !isHistory && (
+                        <div className="space-y-4 p-4 border border-[--color-border-subtle] rounded-[--radius-lg]">
+                            <h3 className="font-semibold">Datos de Compras</h3>
+                            {error && <p className="text-sm text-[--color-error]">{error}</p>}
+                            <div>
+                                <label className="text-sm font-medium text-[--color-text-secondary]">Tracking</label>
+                                <input
+                                    type="text"
+                                    value={tracking}
+                                    onChange={(e) => setTracking(e.target.value)}
+                                    placeholder="Número o enlace de tracking"
+                                    className="mt-1 w-full p-2 border border-[--color-border-strong] rounded-[--radius-md] bg-white"
+                                />
+                                <p className="mt-1 text-xs text-[--color-text-muted]">Solo visible para Compras.</p>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-[--color-text-secondary]">Notas</label>
+                                <textarea
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    rows={3}
+                                    placeholder="Notas adicionales sobre esta entrega"
+                                    className="mt-1 w-full border border-[--color-border-strong] rounded-[--radius-md] p-2 bg-white"
+                                />
+                            </div>
+                            <button
+                                onClick={handleSavePurchasesData}
+                                disabled={isSavingPurchases}
+                                className="w-full py-2 px-4 bg-[--color-primary] text-white font-semibold rounded-[--radius-md] hover:bg-[--color-primary-light] disabled:opacity-60"
+                            >
+                                {isSavingPurchases ? 'Guardando...' : 'Guardar Cambios'}
+                            </button>
+                        </div>
+                    )}
+                    {userRole === 'Compras' && isHistory && (
                         <div className="p-4 border border-[--color-border-subtle] rounded-[--radius-lg] space-y-1">
                             <h3 className="font-semibold">Tracking</h3>
                             <p className="text-sm text-[--color-text-secondary]">
