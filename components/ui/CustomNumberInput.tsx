@@ -2,7 +2,7 @@ import React from 'react';
 
 interface CustomNumberInputProps {
     id: string;
-    label: string;
+    label: string | React.ReactNode;
     value: number | string;
     onChange: (value: string) => void;
     disabled?: boolean;

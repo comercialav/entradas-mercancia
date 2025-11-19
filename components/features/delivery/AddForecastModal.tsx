@@ -14,6 +14,9 @@ export const AddForecastModal: React.FC<AddForecastModalProps> = ({ onClose, onA
     const [expectedDate, setExpectedDate] = useState('');
     const [notes, setNotes] = useState('');
     const [tracking, setTracking] = useState('');
+    const [estimatedPallets, setEstimatedPallets] = useState('');
+    const [estimatedPackages, setEstimatedPackages] = useState('');
+    const [transportCompany, setTransportCompany] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [useCustomSupplier, setUseCustomSupplier] = useState(false);
@@ -41,14 +44,23 @@ export const AddForecastModal: React.FC<AddForecastModalProps> = ({ onClose, onA
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!supplier || !expectedDate) {
-            setError('Proveedor y fecha prevista son obligatorios.');
+        if (!supplier || !expectedDate || !estimatedPallets || !estimatedPackages || !transportCompany.trim()) {
+            setError('Todos los campos son obligatorios.');
             return;
         }
         setError('');
         setIsSubmitting(true);
         try {
-            await onAddDelivery({ supplier, expectedDate, notes, tracking: tracking || undefined, island });
+            await onAddDelivery({ 
+                supplier, 
+                expectedDate, 
+                notes, 
+                tracking: tracking || undefined, 
+                island,
+                estimatedPallets: Number(estimatedPallets),
+                estimatedPackages: Number(estimatedPackages),
+                transportCompany: transportCompany.trim(),
+            });
             onClose();
         } catch (err) {
             console.error(err);
@@ -58,7 +70,7 @@ export const AddForecastModal: React.FC<AddForecastModalProps> = ({ onClose, onA
         }
     };
 
-    const isFormValid = Boolean(supplier && expectedDate);
+    const isFormValid = Boolean(supplier && expectedDate && estimatedPallets && estimatedPackages && transportCompany.trim());
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -180,6 +192,52 @@ export const AddForecastModal: React.FC<AddForecastModalProps> = ({ onClose, onA
                                 value={expectedDate}
                                 onChange={e => setExpectedDate(e.target.value)}
                                 className={`mt-1 block w-full bg-white border ${error && !expectedDate ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] shadow-sm py-2 px-3 focus:outline-none focus:ring-[--color-primary] focus:border-[--color-primary]`}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="estimatedPallets" className="block text-sm font-medium text-[--color-text-secondary]">
+                                    Palets estimados <span className="text-[--color-error]">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    id="estimatedPallets"
+                                    min="1"
+                                    required
+                                    value={estimatedPallets}
+                                    onChange={e => setEstimatedPallets(e.target.value)}
+                                    placeholder="Ej: 5"
+                                    className={`mt-1 block w-full bg-white border ${error && !estimatedPallets ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] shadow-sm py-2 px-3 focus:outline-none focus:ring-[--color-primary] focus:border-[--color-primary]`}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="estimatedPackages" className="block text-sm font-medium text-[--color-text-secondary]">
+                                    Bultos estimados <span className="text-[--color-error]">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    id="estimatedPackages"
+                                    min="1"
+                                    required
+                                    value={estimatedPackages}
+                                    onChange={e => setEstimatedPackages(e.target.value)}
+                                    placeholder="Ej: 20"
+                                    className={`mt-1 block w-full bg-white border ${error && !estimatedPackages ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] shadow-sm py-2 px-3 focus:outline-none focus:ring-[--color-primary] focus:border-[--color-primary]`}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label htmlFor="transportCompany" className="block text-sm font-medium text-[--color-text-secondary]">
+                                Empresa de transporte <span className="text-[--color-error]">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="transportCompany"
+                                required
+                                value={transportCompany}
+                                onChange={e => setTransportCompany(e.target.value)}
+                                placeholder="Ej: Transportes Canarias SL"
+                                className={`mt-1 block w-full bg-white border ${error && !transportCompany.trim() ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] shadow-sm py-2 px-3 focus:outline-none focus:ring-[--color-primary] focus:border-[--color-primary]`}
                             />
                         </div>
                         <div>

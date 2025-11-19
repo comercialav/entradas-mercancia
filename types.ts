@@ -19,4 +19,7 @@ export interface Delivery {
     tracking?: string | null;
     observations?: string | null;
     island: IslandCode;
+    estimatedPallets?: number | null;
+    estimatedPackages?: number | null;
+    transportCompany?: string | null;
 }

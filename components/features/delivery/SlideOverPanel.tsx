@@ -54,6 +54,23 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
 
     const handleSaveWarehouseData = async () => {
         setError(null);
+        
+        // Validar campos obligatorios cuando se registra la llegada
+        if (canRegister) {
+            if (!arrival) {
+                setError('La fecha y hora de llegada es obligatoria.');
+                return;
+            }
+            if (!pallets || pallets === '' || Number(pallets) < 1) {
+                setError('El número de palets es obligatorio.');
+                return;
+            }
+            if (!packages || packages === '' || Number(packages) < 1) {
+                setError('El número de bultos es obligatorio.');
+                return;
+            }
+        }
+        
         setIsSavingWarehouse(true);
         console.info('[slideOver] Guardando datos de almacén para', delivery.id);
         try {
@@ -137,6 +154,29 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                         <TimelineStep icon={<CheckCircleIcon/>} title="Dado de Alta" value={null} isCompleted={delivery.status === 'Dado de alta'} isLast={true} />
                     </div>
 
+                    {/* Información de compras (solo lectura para todos) */}
+                    {(delivery.estimatedPallets || delivery.estimatedPackages || delivery.transportCompany) && (
+                        <div className="p-4 border border-[--color-border-subtle] rounded-[--radius-lg] space-y-2">
+                            <h3 className="font-semibold">Información de Compras</h3>
+                            {(delivery.estimatedPallets || delivery.estimatedPackages) && (
+                                <div>
+                                    <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Estimación inicial</p>
+                                    <p className="text-sm text-[--color-text-primary]">
+                                        {delivery.estimatedPallets && `Palets: ${delivery.estimatedPallets}`}
+                                        {delivery.estimatedPallets && delivery.estimatedPackages && ' • '}
+                                        {delivery.estimatedPackages && `Bultos: ${delivery.estimatedPackages}`}
+                                    </p>
+                                </div>
+                            )}
+                            {delivery.transportCompany && (
+                                <div>
+                                    <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Empresa de transporte</p>
+                                    <p className="text-sm text-[--color-text-primary]">{delivery.transportCompany}</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {userRole === 'Compras' && !isHistory && (
                         <div className="space-y-4 p-4 border border-[--color-border-subtle] rounded-[--radius-lg]">
                             <h3 className="font-semibold">Datos de Compras</h3>
@@ -188,23 +228,34 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                                 <h3 className="font-semibold">Datos de Almacén</h3>
                                 {error && <p className="text-sm text-[--color-error]">{error}</p>}
                                 <div>
-                                    <label className="text-sm font-medium text-[--color-text-secondary]">Fecha y hora de llegada real</label>
-                                    <input type="datetime-local" value={arrival} onChange={e => setArrival(e.target.value)} disabled={!canRegister} className="mt-1 w-full p-2 border border-[--color-border-strong] rounded-[--radius-md] bg-white disabled:bg-gray-100"/>
+                                    <label className="text-sm font-medium text-[--color-text-secondary]">
+                                        Fecha y hora de llegada real {canRegister && <span className="text-[--color-error]">*</span>}
+                                    </label>
+                                    <input 
+                                        type="datetime-local" 
+                                        value={arrival} 
+                                        onChange={e => setArrival(e.target.value)} 
+                                        disabled={!canRegister} 
+                                        required={canRegister}
+                                        className={`mt-1 w-full p-2 border ${error && canRegister && !arrival ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] bg-white disabled:bg-gray-100`}
+                                    />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <CustomNumberInput 
                                         id="pallets"
-                                        label="Palets"
+                                        label={canRegister ? <>Palets <span className="text-[--color-error]">*</span></> : "Palets"}
                                         value={pallets}
                                         onChange={setPallets}
                                         disabled={!canRegister}
+                                        min={canRegister ? 1 : undefined}
                                     />
                                     <CustomNumberInput 
                                         id="packages"
-                                        label="Bultos"
+                                        label={canRegister ? <>Bultos <span className="text-[--color-error]">*</span></> : "Bultos"}
                                         value={packages}
                                         onChange={setPackages}
                                         disabled={!canRegister}
+                                        min={canRegister ? 1 : undefined}
                                     />
                                 </div>
                                 <div>

@@ -1,11 +1,11 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import type { Delivery, UserRole, DeliveryStatus, IslandCode } from '../types';
-import { PlusIcon, FilterIcon, InfoIcon, EmptyBoxIcon } from '../components/ui/Icons';
+import { PlusIcon, FilterIcon, InfoIcon, EmptyBoxIcon, ChevronDownIcon } from '../components/ui/Icons';
 import { AddForecastModal } from '../components/features/delivery/AddForecastModal';
 import { DeliveryTable } from '../components/features/delivery/DeliveryTable';
 import { SlideOverPanel } from '../components/features/delivery/SlideOverPanel';
-import { STATUS_OPTIONS, SUPPLIERS } from '../constants';
+import { STATUS_OPTIONS } from '../constants';
 import { ConfirmationDialog } from '../components/ui/ConfirmationDialog';
 
 interface DashboardPageProps {
@@ -21,20 +21,59 @@ interface DashboardPageProps {
 export const DashboardPage: React.FC<DashboardPageProps> = ({ deliveries, onAddDelivery, onUpdateDelivery, onDeleteDelivery, userRole, onArchive, isSyncing }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null);
-    const [supplierFilter, setSupplierFilter] = useState('');
+    const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
+    const [supplierSearch, setSupplierSearch] = useState('');
+    const [isSupplierDropdownOpen, setIsSupplierDropdownOpen] = useState(false);
+    const supplierDropdownRef = useRef<HTMLDivElement | null>(null);
     const [statusFilter, setStatusFilter] = useState<DeliveryStatus | ''>('');
     const [islandFilter, setIslandFilter] = useState<IslandCode | ''>('');
     const [isArchiving, setIsArchiving] = useState(false);
     const [deliveryPendingDelete, setDeliveryPendingDelete] = useState<Delivery | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     
+    // Obtener lista única de proveedores de las entregas actuales
+    const availableSuppliers = useMemo(() => {
+        const suppliers = new Set(deliveries.map(d => d.supplier));
+        return Array.from(suppliers).sort();
+    }, [deliveries]);
+    
+    const filteredSuppliers = useMemo(() => {
+        return availableSuppliers.filter((name) =>
+            name.toLowerCase().includes(supplierSearch.toLowerCase())
+        );
+    }, [availableSuppliers, supplierSearch]);
+    
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (supplierDropdownRef.current && !supplierDropdownRef.current.contains(event.target as Node)) {
+                setIsSupplierDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+    
+    const toggleSupplier = (supplier: string) => {
+        setSelectedSuppliers(prev => 
+            prev.includes(supplier) 
+                ? prev.filter(s => s !== supplier)
+                : [...prev, supplier]
+        );
+    };
+    
+    const clearSupplierFilter = () => {
+        setSelectedSuppliers([]);
+        setSupplierSearch('');
+    };
+    
     const filteredDeliveries = useMemo(() => {
         return deliveries
-            .filter(d => supplierFilter ? d.supplier.toLowerCase().includes(supplierFilter.toLowerCase()) : true)
+            .filter(d => selectedSuppliers.length === 0 || selectedSuppliers.includes(d.supplier))
             .filter(d => statusFilter ? d.status === statusFilter : true)
             .filter(d => islandFilter ? d.island === islandFilter : true)
             .sort((a, b) => new Date(a.expectedDate).getTime() - new Date(b.expectedDate).getTime());
-    }, [deliveries, supplierFilter, statusFilter, islandFilter]);
+    }, [deliveries, selectedSuppliers, statusFilter, islandFilter]);
 
     return (
         <div className="space-y-6">
@@ -93,15 +132,69 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ deliveries, onAddD
                 <div className="p-4 border-b border-[--color-border-subtle] flex flex-wrap items-center gap-4">
                     <FilterIcon className="w-5 h-5 text-[--color-text-secondary]" />
                     <h3 className="font-semibold text-[--color-text-primary]">Filtros</h3>
-                    <div className="relative">
-                        <select
-                            value={supplierFilter}
-                            onChange={(e) => setSupplierFilter(e.target.value)}
-                            className="bg-gray-50 border border-[--color-border-strong] text-sm rounded-[--radius-pill] py-1.5 px-3 appearance-none focus:outline-none focus:ring-1 focus:ring-[--color-primary] focus:border-[--color-primary]"
+                    <div className="relative" ref={supplierDropdownRef}>
+                        <button
+                            type="button"
+                            onClick={() => setIsSupplierDropdownOpen(prev => !prev)}
+                            className="bg-gray-50 border border-[--color-border-strong] text-sm rounded-[--radius-pill] py-1.5 px-3 min-w-[200px] text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-[--color-primary] focus:border-[--color-primary]"
                         >
-                            <option value="">Todos los proveedores</option>
-                            {SUPPLIERS.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
+                            <span className={selectedSuppliers.length === 0 ? 'text-[--color-text-muted]' : 'text-[--color-text-primary]'}>
+                                {selectedSuppliers.length === 0 
+                                    ? 'Todos los proveedores' 
+                                    : selectedSuppliers.length === 1 
+                                        ? selectedSuppliers[0]
+                                        : `${selectedSuppliers.length} proveedores`
+                                }
+                            </span>
+                            <ChevronDownIcon className={`w-4 h-4 transition-transform ${isSupplierDropdownOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        {isSupplierDropdownOpen && (
+                            <div className="absolute z-20 mt-2 w-full bg-white border border-[--color-border-subtle] rounded-[--radius-md] shadow-xl max-h-80 overflow-hidden flex flex-col">
+                                <div className="p-2 border-b border-[--color-border-subtle]">
+                                    <input
+                                        type="text"
+                                        value={supplierSearch}
+                                        onChange={(e) => setSupplierSearch(e.target.value)}
+                                        placeholder="Buscar proveedor..."
+                                        className="w-full px-3 py-2 text-sm border border-[--color-border-strong] rounded-[--radius-md] focus:outline-none focus:ring-1 focus:ring-[--color-primary] focus:border-[--color-primary]"
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                </div>
+                                <div className="overflow-y-auto max-h-64">
+                                    {filteredSuppliers.length > 0 ? (
+                                        <>
+                                            {filteredSuppliers.map((supplier) => (
+                                                <label
+                                                    key={supplier}
+                                                    className="flex items-center gap-2 px-3 py-2 hover:bg-[--color-primary]/10 cursor-pointer"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedSuppliers.includes(supplier)}
+                                                        onChange={() => toggleSupplier(supplier)}
+                                                        className="rounded border-[--color-border-strong] text-[--color-primary] focus:ring-[--color-primary]"
+                                                    />
+                                                    <span className="text-sm text-[--color-text-primary]">{supplier}</span>
+                                                </label>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        <p className="px-3 py-2 text-sm text-[--color-text-muted]">Sin coincidencias</p>
+                                    )}
+                                </div>
+                                {selectedSuppliers.length > 0 && (
+                                    <div className="p-2 border-t border-[--color-border-subtle]">
+                                        <button
+                                            type="button"
+                                            onClick={clearSupplierFilter}
+                                            className="w-full text-xs text-[--color-primary] hover:text-[--color-primary-dark] font-medium"
+                                        >
+                                            Limpiar selección
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                     <div className="relative">
                         <select

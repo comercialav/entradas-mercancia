@@ -73,6 +73,9 @@ const docToDelivery = (docSnap: QueryDocumentSnapshot<DocumentData>): Delivery =
         tracking: data.trackingCode ?? null,
         observations: data.observations ?? null,
         island: (data.island as IslandCode) ?? 'GC',
+        estimatedPallets: data.estimatedPallets ?? null,
+        estimatedPackages: data.estimatedPackages ?? null,
+        transportCompany: data.transportCompany ?? null,
     };
 };
 
@@ -123,6 +126,9 @@ interface CreateShipmentInput {
     userId: string;
     userDisplayName?: string | null;
     island: IslandCode;
+    estimatedPallets?: number | null;
+    estimatedPackages?: number | null;
+    transportCompany?: string | null;
 }
 
 export const createShipment = async ({
@@ -133,6 +139,9 @@ export const createShipment = async ({
     userId,
     userDisplayName,
     island,
+    estimatedPallets,
+    estimatedPackages,
+    transportCompany,
 }: CreateShipmentInput) => {
     if (!supplier || !expectedDate) {
         throw new Error('Proveedor y fecha prevista son obligatorios');
@@ -153,6 +162,9 @@ export const createShipment = async ({
         arrivalDateTime: null,
         pallets: null,
         packages: null,
+        estimatedPallets: estimatedPallets ?? null,
+        estimatedPackages: estimatedPackages ?? null,
+        transportCompany: transportCompany?.trim() || null,
         arrivalByUserId: null,
         status: 'PLANNED',
         deliveredAt: null,

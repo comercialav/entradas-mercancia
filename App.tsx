@@ -184,6 +184,9 @@ const App: React.FC = () => {
                 userId: authUser.uid,
                 userDisplayName: userName ?? authUser.email ?? 'Usuario',
                 island: newDelivery.island,
+                estimatedPallets: newDelivery.estimatedPallets ?? null,
+                estimatedPackages: newDelivery.estimatedPackages ?? null,
+                transportCompany: newDelivery.transportCompany ?? null,
             });
             showToast('Previsión creada correctamente');
             await triggerNotification('SHIPMENT_CREATED', {
@@ -195,6 +198,9 @@ const App: React.FC = () => {
                 observations: null,
                 updatedBy: updatedByLabel,
                 island: newDelivery.island,
+                estimatedPallets: newDelivery.estimatedPallets ?? null,
+                estimatedPackages: newDelivery.estimatedPackages ?? null,
+                transportCompany: newDelivery.transportCompany ?? null,
             });
         } catch (error) {
             setPendingSync(false);
@@ -238,6 +244,9 @@ const App: React.FC = () => {
                     observations: updatedDelivery.observations ?? null,
                     updatedBy: updatedByLabel,
                     island: updatedDelivery.island,
+                    estimatedPallets: updatedDelivery.estimatedPallets ?? null,
+                    estimatedPackages: updatedDelivery.estimatedPackages ?? null,
+                    transportCompany: updatedDelivery.transportCompany ?? null,
                 });
             }
         }

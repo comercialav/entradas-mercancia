@@ -14,6 +14,9 @@ export interface NotificationRequestPayload {
     observations?: string | null;
     updatedBy?: string | null;
     island: IslandCode;
+    estimatedPallets?: number | null;
+    estimatedPackages?: number | null;
+    transportCompany?: string | null;
 }
 
 const NOTIFY_ENDPOINT = import.meta.env.PROOVEDORES_AV_NOTIFY_ENDPOINT;
