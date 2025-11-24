@@ -73,8 +73,8 @@ const docToDelivery = (docSnap: QueryDocumentSnapshot<DocumentData>): Delivery =
         tracking: data.trackingCode ?? null,
         observations: data.observations ?? null,
         island: (data.island as IslandCode) ?? 'GC',
-        estimatedPallets: data.estimatedPallets ?? null,
-        estimatedPackages: data.estimatedPackages ?? null,
+        estimatedPallets: data.estimatedPallets != null ? Number(data.estimatedPallets) : null,
+        estimatedPackages: data.estimatedPackages != null ? Number(data.estimatedPackages) : null,
         transportCompany: data.transportCompany ?? null,
     };
 };
@@ -162,8 +162,8 @@ export const createShipment = async ({
         arrivalDateTime: null,
         pallets: null,
         packages: null,
-        estimatedPallets: estimatedPallets ?? null,
-        estimatedPackages: estimatedPackages ?? null,
+        estimatedPallets: estimatedPallets != null ? Number(estimatedPallets) : null,
+        estimatedPackages: estimatedPackages != null ? Number(estimatedPackages) : null,
         transportCompany: transportCompany?.trim() || null,
         arrivalByUserId: null,
         status: 'PLANNED',

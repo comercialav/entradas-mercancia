@@ -61,11 +61,11 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                 setError('La fecha y hora de llegada es obligatoria.');
                 return;
             }
-            if (!pallets || pallets === '' || Number(pallets) < 1) {
+            if (pallets === '') {
                 setError('El número de palets es obligatorio.');
                 return;
             }
-            if (!packages || packages === '' || Number(packages) < 1) {
+            if (packages === '') {
                 setError('El número de bultos es obligatorio.');
                 return;
             }
@@ -247,7 +247,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                                         value={pallets}
                                         onChange={setPallets}
                                         disabled={!canRegister}
-                                        min={canRegister ? 1 : undefined}
+                                        min={0}
                                     />
                                     <CustomNumberInput 
                                         id="packages"
@@ -255,7 +255,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                                         value={packages}
                                         onChange={setPackages}
                                         disabled={!canRegister}
-                                        min={canRegister ? 1 : undefined}
+                                        min={0}
                                     />
                                 </div>
                                 <div>
