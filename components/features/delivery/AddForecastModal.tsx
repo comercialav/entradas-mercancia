@@ -44,7 +44,7 @@ export const AddForecastModal: React.FC<AddForecastModalProps> = ({ onClose, onA
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!supplier || !expectedDate || !estimatedPallets || !estimatedPackages || !transportCompany.trim()) {
+        if (!supplier || !expectedDate || estimatedPallets === '' || estimatedPackages === '' || !transportCompany.trim()) {
             setError('Todos los campos son obligatorios.');
             return;
         }
@@ -70,7 +70,7 @@ export const AddForecastModal: React.FC<AddForecastModalProps> = ({ onClose, onA
         }
     };
 
-    const isFormValid = Boolean(supplier && expectedDate && estimatedPallets && estimatedPackages && transportCompany.trim());
+    const isFormValid = Boolean(supplier && expectedDate && estimatedPallets !== '' && estimatedPackages !== '' && transportCompany.trim());
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -202,12 +202,12 @@ export const AddForecastModal: React.FC<AddForecastModalProps> = ({ onClose, onA
                                 <input
                                     type="number"
                                     id="estimatedPallets"
-                                    min="1"
+                                    min="0"
                                     required
                                     value={estimatedPallets}
                                     onChange={e => setEstimatedPallets(e.target.value)}
                                     placeholder="Ej: 5"
-                                    className={`mt-1 block w-full bg-white border ${error && !estimatedPallets ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] shadow-sm py-2 px-3 focus:outline-none focus:ring-[--color-primary] focus:border-[--color-primary]`}
+                                    className={`mt-1 block w-full bg-white border ${error && estimatedPallets === '' ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] shadow-sm py-2 px-3 focus:outline-none focus:ring-[--color-primary] focus:border-[--color-primary]`}
                                 />
                             </div>
                             <div>
@@ -217,12 +217,12 @@ export const AddForecastModal: React.FC<AddForecastModalProps> = ({ onClose, onA
                                 <input
                                     type="number"
                                     id="estimatedPackages"
-                                    min="1"
+                                    min="0"
                                     required
                                     value={estimatedPackages}
                                     onChange={e => setEstimatedPackages(e.target.value)}
                                     placeholder="Ej: 20"
-                                    className={`mt-1 block w-full bg-white border ${error && !estimatedPackages ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] shadow-sm py-2 px-3 focus:outline-none focus:ring-[--color-primary] focus:border-[--color-primary]`}
+                                    className={`mt-1 block w-full bg-white border ${error && estimatedPackages === '' ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] shadow-sm py-2 px-3 focus:outline-none focus:ring-[--color-primary] focus:border-[--color-primary]`}
                                 />
                             </div>
                         </div>
