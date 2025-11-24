@@ -155,9 +155,9 @@ const TableRow: React.FC<TableRowProps> = ({ delivery, onSelect, isHistory, isEx
                                 <div>
                                     <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Estimación inicial</p>
                                     <p className="mt-1 text-[--color-text-primary]">
-                                        {delivery.estimatedPallets && `Palets: ${delivery.estimatedPallets}`}
-                                        {delivery.estimatedPallets && delivery.estimatedPackages && ' • '}
-                                        {delivery.estimatedPackages && `Bultos: ${delivery.estimatedPackages}`}
+                                        {delivery.estimatedPallets != null && `Palets: ${String(delivery.estimatedPallets)}`}
+                                        {delivery.estimatedPallets != null && delivery.estimatedPackages != null && ' • '}
+                                        {delivery.estimatedPackages != null && `Bultos: ${String(delivery.estimatedPackages)}`}
                                     </p>
                                 </div>
                             )}

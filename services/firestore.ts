@@ -73,8 +73,8 @@ const docToDelivery = (docSnap: QueryDocumentSnapshot<DocumentData>): Delivery =
         tracking: data.trackingCode ?? null,
         observations: data.observations ?? null,
         island: (data.island as IslandCode) ?? 'GC',
-        estimatedPallets: data.estimatedPallets != null ? Number(data.estimatedPallets) : null,
-        estimatedPackages: data.estimatedPackages != null ? Number(data.estimatedPackages) : null,
+        estimatedPallets: data.estimatedPallets != null && data.estimatedPallets !== undefined ? data.estimatedPallets : null,
+        estimatedPackages: data.estimatedPackages != null && data.estimatedPackages !== undefined ? data.estimatedPackages : null,
         transportCompany: data.transportCompany ?? null,
     };
 };

@@ -162,9 +162,9 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                                 <div>
                                     <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Estimación inicial</p>
                                     <p className="text-sm text-[--color-text-primary]">
-                                        {delivery.estimatedPallets && `Palets: ${delivery.estimatedPallets}`}
-                                        {delivery.estimatedPallets && delivery.estimatedPackages && ' • '}
-                                        {delivery.estimatedPackages && `Bultos: ${delivery.estimatedPackages}`}
+                                        {delivery.estimatedPallets != null && `Palets: ${String(delivery.estimatedPallets)}`}
+                                        {delivery.estimatedPallets != null && delivery.estimatedPackages != null && ' • '}
+                                        {delivery.estimatedPackages != null && `Bultos: ${String(delivery.estimatedPackages)}`}
                                     </p>
                                 </div>
                             )}
