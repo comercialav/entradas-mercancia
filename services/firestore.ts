@@ -195,6 +195,7 @@ export const updateShipmentFromDelivery = async (
         trackingCode: delivery.tracking ?? null,
         observations: delivery.observations ?? null,
         island: delivery.island,
+        transportCompany: delivery.transportCompany ?? null,
     };
 
     if (firestoreStatus === 'ARRIVED') {

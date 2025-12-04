@@ -35,6 +35,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
     const [observations, setObservations] = useState(delivery.observations ?? '');
     const [tracking, setTracking] = useState(delivery.tracking ?? '');
     const [notes, setNotes] = useState(delivery.notes ?? '');
+    const [transportCompany, setTransportCompany] = useState(delivery.transportCompany ?? '');
     const [confirmAction, setConfirmAction] = useState<'alta' | null>(null);
     const [isSavingWarehouse, setIsSavingWarehouse] = useState(false);
     const [isSavingPurchases, setIsSavingPurchases] = useState(false);
@@ -49,12 +50,13 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
         setObservations(delivery.observations ?? '');
         setTracking(delivery.tracking ?? '');
         setNotes(delivery.notes ?? '');
+        setTransportCompany(delivery.transportCompany ?? '');
         setError(null);
     }, [delivery.id]);
 
     const handleSaveWarehouseData = async () => {
         setError(null);
-        
+
         // Validar campos obligatorios cuando se registra la llegada
         if (canRegister) {
             if (!arrival) {
@@ -70,7 +72,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                 return;
             }
         }
-        
+
         setIsSavingWarehouse(true);
         console.info('[slideOver] Guardando datos de almacén para', delivery.id);
         try {
@@ -102,6 +104,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                 ...delivery,
                 tracking: tracking.trim() || null,
                 notes: notes.trim() || null,
+                transportCompany: transportCompany.trim() || null,
             });
             console.info('[slideOver] Datos de compras guardados correctamente');
             onClose();
@@ -132,7 +135,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
 
     const isWarehouseUser = userRole === 'Almacén';
     const canRegister = isWarehouseUser && delivery.status === 'En tránsito';
-    
+
     return (
         <div className="fixed inset-0 z-40">
             <div className="absolute inset-0 bg-black/30" onClick={onClose}></div>
@@ -149,9 +152,9 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                 <div className="flex-1 overflow-y-auto p-6 space-y-8">
                     {/* Timeline */}
                     <div>
-                        <TimelineStep icon={<CalendarIcon/>} title="En tránsito (Compras)" value={new Date(delivery.expectedDate).toLocaleDateString('es-ES')} isCompleted={true} />
-                        <TimelineStep icon={<TruckIcon/>} title="En almacén (Almacén)" value={delivery.arrival ? new Date(delivery.arrival).toLocaleString('es-ES') : null} isCompleted={delivery.status !== 'En tránsito'} />
-                        <TimelineStep icon={<CheckCircleIcon/>} title="Dado de Alta" value={null} isCompleted={delivery.status === 'Dado de alta'} isLast={true} />
+                        <TimelineStep icon={<CalendarIcon />} title="En tránsito (Compras)" value={new Date(delivery.expectedDate).toLocaleDateString('es-ES')} isCompleted={true} />
+                        <TimelineStep icon={<TruckIcon />} title="En almacén (Almacén)" value={delivery.arrival ? new Date(delivery.arrival).toLocaleString('es-ES') : null} isCompleted={delivery.status !== 'En tránsito'} />
+                        <TimelineStep icon={<CheckCircleIcon />} title="Dado de Alta" value={null} isCompleted={delivery.status === 'Dado de alta'} isLast={true} />
                     </div>
 
                     {/* Información de compras (solo lectura para todos) */}
@@ -193,6 +196,16 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                                 <p className="mt-1 text-xs text-[--color-text-muted]">Solo visible para Compras.</p>
                             </div>
                             <div>
+                                <label className="text-sm font-medium text-[--color-text-secondary]">Empresa de transporte</label>
+                                <input
+                                    type="text"
+                                    value={transportCompany}
+                                    onChange={(e) => setTransportCompany(e.target.value)}
+                                    placeholder="Nombre de la empresa de transporte"
+                                    className="mt-1 w-full p-2 border border-[--color-border-strong] rounded-[--radius-md] bg-white"
+                                />
+                            </div>
+                            <div>
                                 <label className="text-sm font-medium text-[--color-text-secondary]">Notas</label>
                                 <textarea
                                     value={notes}
@@ -231,17 +244,17 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                                     <label className="text-sm font-medium text-[--color-text-secondary]">
                                         Fecha y hora de llegada real {canRegister && <span className="text-[--color-error]">*</span>}
                                     </label>
-                                    <input 
-                                        type="datetime-local" 
-                                        value={arrival} 
-                                        onChange={e => setArrival(e.target.value)} 
-                                        disabled={!canRegister} 
+                                    <input
+                                        type="datetime-local"
+                                        value={arrival}
+                                        onChange={e => setArrival(e.target.value)}
+                                        disabled={!canRegister}
                                         required={canRegister}
                                         className={`mt-1 w-full p-2 border ${error && canRegister && !arrival ? 'border-[--color-error]' : 'border-[--color-border-strong]'} rounded-[--radius-md] bg-white disabled:bg-gray-100`}
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <CustomNumberInput 
+                                    <CustomNumberInput
                                         id="pallets"
                                         label={canRegister ? <>Palets <span className="text-[--color-error]">*</span></> : "Palets"}
                                         value={pallets}
@@ -249,7 +262,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                                         disabled={!canRegister}
                                         min={0}
                                     />
-                                    <CustomNumberInput 
+                                    <CustomNumberInput
                                         id="packages"
                                         label={canRegister ? <>Bultos <span className="text-[--color-error]">*</span></> : "Bultos"}
                                         value={packages}
