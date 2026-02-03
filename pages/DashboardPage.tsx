@@ -16,9 +16,12 @@ interface DashboardPageProps {
     userRole: UserRole;
     onArchive: () => Promise<void>;
     isSyncing: boolean;
+    userId: string;
+    userDisplayName?: string;
 }
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ deliveries, onAddDelivery, onUpdateDelivery, onDeleteDelivery, userRole, onArchive, isSyncing }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ deliveries, onAddDelivery, onUpdateDelivery, onDeleteDelivery, userRole, onArchive, isSyncing, userId, userDisplayName }) => {
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null);
     const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
@@ -30,19 +33,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ deliveries, onAddD
     const [isArchiving, setIsArchiving] = useState(false);
     const [deliveryPendingDelete, setDeliveryPendingDelete] = useState<Delivery | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+    const [mobileSearch, setMobileSearch] = useState('');
+
     // Obtener lista única de proveedores de las entregas actuales
     const availableSuppliers = useMemo(() => {
         const suppliers = new Set(deliveries.map(d => d.supplier));
         return Array.from(suppliers).sort();
     }, [deliveries]);
-    
+
     const filteredSuppliers = useMemo(() => {
         return availableSuppliers.filter((name) =>
             name.toLowerCase().includes(supplierSearch.toLowerCase())
         );
     }, [availableSuppliers, supplierSearch]);
-    
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (supplierDropdownRef.current && !supplierDropdownRef.current.contains(event.target as Node)) {
@@ -53,55 +58,80 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ deliveries, onAddD
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-    
+
     const toggleSupplier = (supplier: string) => {
-        setSelectedSuppliers(prev => 
-            prev.includes(supplier) 
+        setSelectedSuppliers(prev =>
+            prev.includes(supplier)
                 ? prev.filter(s => s !== supplier)
                 : [...prev, supplier]
         );
     };
-    
+
     const clearSupplierFilter = () => {
         setSelectedSuppliers([]);
         setSupplierSearch('');
     };
-    
+
     const filteredDeliveries = useMemo(() => {
         return deliveries
             .filter(d => selectedSuppliers.length === 0 || selectedSuppliers.includes(d.supplier))
             .filter(d => statusFilter ? d.status === statusFilter : true)
             .filter(d => islandFilter ? d.island === islandFilter : true)
+            .filter(d => mobileSearch ? d.supplier.toLowerCase().includes(mobileSearch.toLowerCase()) : true)
             .sort((a, b) => new Date(a.expectedDate).getTime() - new Date(b.expectedDate).getTime());
-    }, [deliveries, selectedSuppliers, statusFilter, islandFilter]);
+    }, [deliveries, selectedSuppliers, statusFilter, islandFilter, mobileSearch]);
 
     return (
         <div className="space-y-6">
             <div className="space-y-3">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div className="flex items-center gap-3">
-                    <h2 className="text-3xl font-bold text-[--color-text-primary]">Panel de proveedores</h2>
-                    {isSyncing && (
-                        <span className="flex items-center gap-2 text-sm text-[--color-text-secondary]">
-                            <svg className="w-4 h-4 animate-spin text-[--color-primary]" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                            </svg>
-                            Sincronizando...
-                        </span>
-                    )}
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-xl md:text-3xl font-bold text-[--color-text-primary]">Panel de proveedores</h2>
+                        {isSyncing && (
+                            <span className="flex items-center gap-2 text-sm text-[--color-text-secondary]">
+                                <svg className="w-4 h-4 animate-spin text-[--color-primary]" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                                Sincronizando...
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-4">
+                        {userRole === 'Compras' && (
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="flex items-center gap-2 bg-[--color-primary] text-white font-semibold py-2 px-4 rounded-[--radius-md] hover:bg-[--color-primary-light] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[--color-primary-light] transition-all duration-150 ease-out shadow-sm"
+                            >
+                                <PlusIcon />
+                                Añadir previsión
+                            </button>
+                        )}
+                    </div>
                 </div>
-                <div className="flex items-center gap-4">
-                    {userRole === 'Compras' && (
+            </div>
+
+            {/* Buscador Móvil - solo visible en móvil */}
+            <div className="lg:hidden">
+                <div className="relative">
+                    <input
+                        type="text"
+                        value={mobileSearch}
+                        onChange={(e) => setMobileSearch(e.target.value)}
+                        placeholder="Buscar proveedor..."
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-[--color-border-strong] rounded-[--radius-lg] text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary] focus:border-[--color-primary]"
+                    />
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[--color-text-muted]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    {mobileSearch && (
                         <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="flex items-center gap-2 bg-[--color-primary] text-white font-semibold py-2 px-4 rounded-[--radius-md] hover:bg-[--color-primary-light] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[--color-primary-light] transition-all duration-150 ease-out shadow-sm"
+                            onClick={() => setMobileSearch('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[--color-text-muted] hover:text-[--color-text-primary]"
                         >
-                            <PlusIcon />
-                            Añadir previsión
+                            ✕
                         </button>
                     )}
-                </div>
                 </div>
             </div>
 
@@ -129,19 +159,34 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ deliveries, onAddD
             </div>
 
             <div className="bg-[--color-surface] rounded-[--radius-lg] shadow-[--shadow-soft] border border-[--color-border-subtle]">
-                <div className="p-4 border-b border-[--color-border-subtle] flex flex-wrap items-center gap-4">
+                {/* Header de filtros - clickable en móvil */}
+                <button
+                    type="button"
+                    onClick={() => setIsFiltersOpen(prev => !prev)}
+                    className="w-full p-4 border-b border-[--color-border-subtle] flex items-center gap-4 lg:cursor-default"
+                >
                     <FilterIcon className="w-5 h-5 text-[--color-text-secondary]" />
                     <h3 className="font-semibold text-[--color-text-primary]">Filtros</h3>
-                    <div className="relative" ref={supplierDropdownRef}>
+                    {/* Indicador de filtros activos */}
+                    {(selectedSuppliers.length > 0 || statusFilter || islandFilter) && (
+                        <span className="bg-[--color-primary] text-white text-xs px-2 py-0.5 rounded-full">
+                            {(selectedSuppliers.length > 0 ? 1 : 0) + (statusFilter ? 1 : 0) + (islandFilter ? 1 : 0)}
+                        </span>
+                    )}
+                    <ChevronDownIcon className={`ml-auto w-5 h-5 text-[--color-text-muted] lg:hidden transition-transform ${isFiltersOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {/* Contenedor de filtros - colapsable en móvil */}
+                <div className={`p-4 border-b border-[--color-border-subtle] flex-wrap items-center gap-4 ${isFiltersOpen ? 'flex' : 'hidden'} lg:flex`}>
+                    <div className="relative w-full lg:w-auto" ref={supplierDropdownRef}>
                         <button
                             type="button"
                             onClick={() => setIsSupplierDropdownOpen(prev => !prev)}
                             className="bg-gray-50 border border-[--color-border-strong] text-sm rounded-[--radius-pill] py-1.5 px-3 min-w-[200px] text-left flex items-center justify-between focus:outline-none focus:ring-1 focus:ring-[--color-primary] focus:border-[--color-primary]"
                         >
                             <span className={selectedSuppliers.length === 0 ? 'text-[--color-text-muted]' : 'text-[--color-text-primary]'}>
-                                {selectedSuppliers.length === 0 
-                                    ? 'Todos los proveedores' 
-                                    : selectedSuppliers.length === 1 
+                                {selectedSuppliers.length === 0
+                                    ? 'Todos los proveedores'
+                                    : selectedSuppliers.length === 1
                                         ? selectedSuppliers[0]
                                         : `${selectedSuppliers.length} proveedores`
                                 }
@@ -198,9 +243,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ deliveries, onAddD
                     </div>
                     <div className="relative">
                         <select
-                           value={statusFilter}
-                           onChange={(e) => setStatusFilter(e.target.value as DeliveryStatus | '')}
-                           className="bg-gray-50 border border-[--color-border-strong] text-sm rounded-[--radius-pill] py-1.5 px-3 appearance-none focus:outline-none focus:ring-1 focus:ring-[--color-primary] focus:border-[--color-primary]"
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value as DeliveryStatus | '')}
+                            className="bg-gray-50 border border-[--color-border-strong] text-sm rounded-[--radius-pill] py-1.5 px-3 appearance-none focus:outline-none focus:ring-1 focus:ring-[--color-primary] focus:border-[--color-primary]"
                         >
                             <option value="">Todos los estados</option>
                             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -233,26 +278,28 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ deliveries, onAddD
                         <EmptyBoxIcon className="mx-auto w-24 h-24 text-[--color-border-strong]" />
                         <h3 className="mt-4 text-xl font-semibold text-[--color-text-primary]">No hay previsiones que mostrar</h3>
                         <p className="mt-1 text-[--color-text-secondary]">
-                           {userRole === 'Compras' ? "Crea la primera desde el botón ‘Añadir previsión’." : "No hay llegadas previstas que coincidan con los filtros."} 
+                            {userRole === 'Compras' ? "Crea la primera desde el botón ‘Añadir previsión’." : "No hay llegadas previstas que coincidan con los filtros."}
                         </p>
                     </div>
                 )}
             </div>
 
             {isModalOpen && (
-                <AddForecastModal 
-                    onClose={() => setIsModalOpen(false)} 
+                <AddForecastModal
+                    onClose={() => setIsModalOpen(false)}
                     onAddDelivery={onAddDelivery}
                     showTrackingField={userRole === 'Compras'}
                 />
             )}
 
             {selectedDelivery && (
-                <SlideOverPanel 
-                    delivery={selectedDelivery} 
+                <SlideOverPanel
+                    delivery={selectedDelivery}
                     onClose={() => setSelectedDelivery(null)}
                     onUpdateDelivery={onUpdateDelivery}
                     userRole={userRole}
+                    userId={userId}
+                    userDisplayName={userDisplayName}
                 />
             )}
             {deliveryPendingDelete && (

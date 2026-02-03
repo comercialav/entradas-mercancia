@@ -1,51 +1,51 @@
 # Environment variables and secrets
 env:
-  # Firebase configuration (required)
+  # Firebase configuration (required) - Using Cloud Secret Manager
   - variable: VITE_FIREBASE_API_KEY
-    value: "AIzaSyA4sJtWJc1Zox5xyiiwML9yi9ez8nJogT0"
+    secret: firebase-api-key
     availability:
       - BUILD
       - RUNTIME
 
   - variable: VITE_FIREBASE_AUTH_DOMAIN
-    value: "entradas-63f0e.firebaseapp.com"
+    secret: firebase-auth-domain
     availability:
       - BUILD
       - RUNTIME
 
   - variable: VITE_FIREBASE_PROJECT_ID
-    value: "entradas-63f0e"
+    value: "entradas-63f0e" # No es sensible, puede estar en código
     availability:
       - BUILD
       - RUNTIME
 
   - variable: VITE_FIREBASE_STORAGE_BUCKET
-    value: "entradas-63f0e.firebasestorage.app"
+    value: "entradas-63f0e.firebasestorage.app" # No es sensible, puede estar en código
     availability:
       - BUILD
       - RUNTIME
 
   - variable: VITE_FIREBASE_MESSAGING_SENDER_ID
-    value: "752789962386"
+    secret: firebase-messaging-sender-id
     availability:
       - BUILD
       - RUNTIME
 
   - variable: VITE_FIREBASE_APP_ID
-    value: "1:752789962386:web:6c20c85bb33194e970304b"
+    secret: firebase-app-id
     availability:
       - BUILD
       - RUNTIME
 
   # Notifications endpoint (optional)
   - variable: VITE_NOTIFY_ENDPOINT
-    value: "https://us-central1-entradas-63f0e.cloudfunctions.net/notify"
+    value: "https://us-central1-entradas-63f0e.cloudfunctions.net/notify" # URL pública, no es sensible
     availability:
       - BUILD
       - RUNTIME
 
   - variable: VITE_DISABLE_NOTIFICATIONS
-    value: "false"
+    value: "false" # No es sensible
     availability:
       - BUILD
       - RUNTIME

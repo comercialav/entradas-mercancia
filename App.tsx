@@ -169,7 +169,7 @@ const App: React.FC = () => {
             setAuthUser(null);
         }
     };
-    
+
     const addDelivery = useCallback(async (newDelivery: Omit<Delivery, 'id' | 'status' | 'lastUpdate' | 'arrival' | 'pallets' | 'packages'>) => {
         if (!authUser) {
             throw new Error('Usuario no autenticado');
@@ -296,21 +296,28 @@ const App: React.FC = () => {
             <div className="flex flex-1 overflow-hidden">
                 <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
                 <main className="flex-1 overflow-y-auto">
-                    <div className="max-w-[1440px] mx-auto p-6 md:p-8">
+                    <div className="max-w-[1440px] mx-auto p-4 md:p-6 lg:p-8 pb-24 lg:pb-8">
                         {currentPage === 'dashboard' && (
-                            <DashboardPage 
-                                deliveries={visibleDeliveries} 
-                                onAddDelivery={addDelivery} 
+                            <DashboardPage
+                                deliveries={visibleDeliveries}
+                                onAddDelivery={addDelivery}
                                 onUpdateDelivery={updateDelivery}
                                 onDeleteDelivery={deleteDelivery}
                                 userRole={userRole}
                                 onArchive={handleManualArchive}
                                 isSyncing={isSyncing}
                                 userIsland={userIsland}
+                                userId={authUser?.uid ?? ''}
+                                userDisplayName={userName}
                             />
                         )}
                         {currentPage === 'history' && (
-                            <HistoryPage deliveries={visibleArchived} userRole={userRole} />
+                            <HistoryPage
+                                deliveries={visibleArchived}
+                                userRole={userRole}
+                                userId={authUser?.uid ?? ''}
+                                userDisplayName={userName}
+                            />
                         )}
                     </div>
                 </main>

@@ -15,10 +15,11 @@ import {
     where,
     writeBatch,
 } from 'firebase/firestore';
-import type { Delivery, DeliveryStatus, UserRole, IslandCode } from '../types';
+import type { Delivery, DeliveryStatus, UserRole, IslandCode, DeliveryPhoto } from '../types';
 import { db } from '../firebase';
 
 export type FirestoreRole = 'compras' | 'almacen' | 'admin';
+
 
 export interface FirestoreUserProfile {
     uid: string;
@@ -76,8 +77,10 @@ const docToDelivery = (docSnap: QueryDocumentSnapshot<DocumentData>): Delivery =
         estimatedPallets: data.estimatedPallets != null && data.estimatedPallets !== undefined ? data.estimatedPallets : null,
         estimatedPackages: data.estimatedPackages != null && data.estimatedPackages !== undefined ? data.estimatedPackages : null,
         transportCompany: data.transportCompany ?? null,
+        photos: Array.isArray(data.photos) ? data.photos : [],
     };
 };
+
 
 const normalizeSupplierId = (name: string) => name.trim().toLowerCase().replace(/\s+/g, '-');
 

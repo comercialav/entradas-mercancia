@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import type { Delivery, UserRole, DeliveryStatus } from '../../../types';
-import { CloseIcon, CalendarIcon, TruckIcon, CheckCircleIcon } from '../../ui/Icons';
+import type { Delivery, UserRole, DeliveryStatus, DeliveryPhoto } from '../../../types';
+import { CloseIcon, CalendarIcon, TruckIcon, CheckCircleIcon, CameraIcon } from '../../ui/Icons';
 import { StatusBadge } from './StatusBadge';
 import { ConfirmationDialog } from '../../ui/ConfirmationDialog';
 import { CustomNumberInput } from '../../ui/CustomNumberInput';
+import { PhotoUploader } from '../../ui/PhotoUploader';
+import { PhotoGallery } from '../../ui/PhotoGallery';
+import { deleteDeliveryPhoto } from '../../../services/storageService';
+
 
 interface SlideOverPanelProps {
     delivery: Delivery;
@@ -11,7 +15,10 @@ interface SlideOverPanelProps {
     onUpdateDelivery: (delivery: Delivery) => Promise<void>;
     userRole: UserRole;
     isHistory?: boolean;
+    userId: string;
+    userDisplayName?: string;
 }
+
 
 const TimelineStep: React.FC<{ icon: React.ReactNode, title: string, value: string | null, isCompleted: boolean, isLast?: boolean }> = ({ icon, title, value, isCompleted, isLast }) => (
     <div className="flex gap-4">
@@ -28,7 +35,7 @@ const TimelineStep: React.FC<{ icon: React.ReactNode, title: string, value: stri
     </div>
 );
 
-export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClose, onUpdateDelivery, userRole, isHistory }) => {
+export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClose, onUpdateDelivery, userRole, isHistory, userId, userDisplayName }) => {
     const [arrival, setArrival] = useState(delivery.arrival ? delivery.arrival.substring(0, 16) : '');
     const [pallets, setPallets] = useState(delivery.pallets?.toString() ?? '');
     const [packages, setPackages] = useState(delivery.packages?.toString() ?? '');
@@ -41,6 +48,8 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
     const [isSavingPurchases, setIsSavingPurchases] = useState(false);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [photos, setPhotos] = useState<DeliveryPhoto[]>(delivery.photos ?? []);
+
 
     // Actualizar estados cuando cambie el delivery
     useEffect(() => {
@@ -51,8 +60,10 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
         setTracking(delivery.tracking ?? '');
         setNotes(delivery.notes ?? '');
         setTransportCompany(delivery.transportCompany ?? '');
+        setPhotos(delivery.photos ?? []);
         setError(null);
     }, [delivery.id]);
+
 
     const handleSaveWarehouseData = async () => {
         setError(null);
@@ -292,7 +303,44 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                                 )}
                             </div>
 
-                            {/* Actions */}
+                            {/* Fotos de Incidencias */}
+                            <div className="p-4 border border-[--color-border-subtle] rounded-[--radius-lg] space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <CameraIcon className="w-5 h-5 text-[--color-primary]" />
+                                    <h3 className="font-semibold">Fotos de Incidencias</h3>
+                                    {photos.length > 0 && (
+                                        <span className="ml-auto text-xs bg-[--color-primary]/10 text-[--color-primary] px-2 py-1 rounded-full font-medium">
+                                            {photos.length} foto{photos.length !== 1 ? 's' : ''}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {isWarehouseUser && (delivery.status === 'En tránsito' || delivery.status === 'En almacén') ? (
+                                    <PhotoUploader
+                                        deliveryId={delivery.id}
+                                        userId={userId}
+                                        userDisplayName={userDisplayName}
+                                        photos={photos}
+                                        onPhotoUploaded={(photo) => setPhotos(prev => [...prev, photo])}
+                                        onPhotoDeleted={(photo) => setPhotos(prev => prev.filter(p => p.id !== photo.id))}
+                                    />
+                                ) : (
+                                    <PhotoGallery
+                                        photos={photos}
+                                        canDelete={isWarehouseUser}
+                                        onDeletePhoto={async (photo) => {
+                                            await deleteDeliveryPhoto(delivery.id, photo);
+                                            setPhotos(prev => prev.filter(p => p.id !== photo.id));
+                                            // Actualizar el delivery
+                                            await onUpdateDelivery({
+                                                ...delivery,
+                                                photos: photos.filter(p => p.id !== photo.id)
+                                            });
+                                        }}
+                                    />
+                                )}
+                            </div>
+
                             <div className="space-y-2">
                                 {delivery.status === 'En almacén' && isWarehouseUser && (
                                     <button

@@ -9,9 +9,12 @@ import { STATUS_OPTIONS } from '../constants';
 interface HistoryPageProps {
     deliveries: Delivery[];
     userRole: UserRole;
+    userId: string;
+    userDisplayName?: string;
 }
 
-export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole }) => {
+export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole, userId, userDisplayName }) => {
+
     const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null);
     const [supplierFilter, setSupplierFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState<DeliveryStatus | ''>('Dado de alta');
@@ -68,14 +71,14 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole }
                         </div>
                     )}
                     <div className="flex items-center gap-2">
-                        <input 
+                        <input
                             type="date"
                             value={dateFrom}
                             onChange={(e) => setDateFrom(e.target.value)}
                             className="bg-gray-50 border border-[--color-border-strong] text-sm rounded-[--radius-pill] py-1.5 px-3 focus:outline-none focus:ring-1 focus:ring-[--color-primary] focus:border-[--color-primary]"
                         />
                         <span className="text-sm text-[--color-text-secondary]">a</span>
-                        <input 
+                        <input
                             type="date"
                             value={dateTo}
                             onChange={(e) => setDateTo(e.target.value)}
@@ -133,19 +136,21 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole }
                         <EmptyBoxIcon className="mx-auto w-24 h-24 text-[--color-border-strong]" />
                         <h3 className="mt-4 text-xl font-semibold text-[--color-text-primary]">No hay registros en el historial</h3>
                         <p className="mt-1 text-[--color-text-secondary]">
-                           Las entregas completadas aparecerán aquí después de ser archivadas.
+                            Las entregas completadas aparecerán aquí después de ser archivadas.
                         </p>
                     </div>
                 )}
             </div>
-            
+
             {selectedDelivery && (
-                <SlideOverPanel 
-                    delivery={selectedDelivery} 
+                <SlideOverPanel
+                    delivery={selectedDelivery}
                     onClose={() => setSelectedDelivery(null)}
-                    onUpdateDelivery={async () => {}} // No updates in history
+                    onUpdateDelivery={async () => { }} // No updates in history
                     userRole={userRole}
                     isHistory={true}
+                    userId={userId}
+                    userDisplayName={userDisplayName}
                 />
             )}
         </div>

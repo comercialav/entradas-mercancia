@@ -6,6 +6,14 @@ export type IslandCode = 'GC' | 'TF';
 
 export type DeliveryStatus = 'En tránsito' | 'En almacén' | 'Dado de alta';
 
+export interface DeliveryPhoto {
+    id: string;
+    url: string;
+    uploadedAt: string; // ISO format string
+    uploadedBy: string;
+    uploadedByName?: string;
+}
+
 export interface Delivery {
     id: string;
     supplier: string;
@@ -22,4 +30,5 @@ export interface Delivery {
     estimatedPallets?: number | null;
     estimatedPackages?: number | null;
     transportCompany?: string | null;
+    photos?: DeliveryPhoto[];
 }
