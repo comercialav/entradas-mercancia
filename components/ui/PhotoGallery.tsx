@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CloseIcon, ImageIcon, TrashIcon } from './Icons';
 import type { DeliveryPhoto } from '../../types';
 
@@ -63,7 +64,10 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                 {photos.map((photo) => (
                     <div key={photo.id} className="relative">
                         <button
-                            onClick={() => setSelectedPhoto(photo)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedPhoto(photo);
+                            }}
                             className="relative aspect-square rounded-lg overflow-hidden w-full focus:outline-none focus:ring-2 focus:ring-[--color-primary] focus:ring-offset-2 group"
                         >
                             <img
@@ -96,9 +100,9 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
             </div>
 
             {/* Lightbox Modal */}
-            {selectedPhoto && (
+            {selectedPhoto && createPortal(
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-fadeIn"
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 animate-fadeIn"
                     onClick={() => setSelectedPhoto(null)}
                 >
                     <div
@@ -163,7 +167,8 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
                             </div>
                         )}
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

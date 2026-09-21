@@ -62,7 +62,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
         setTransportCompany(delivery.transportCompany ?? '');
         setPhotos(delivery.photos ?? []);
         setError(null);
-    }, [delivery.id]);
+    }, [delivery.id, delivery.photos]);
 
 
     const handleSaveWarehouseData = async () => {
@@ -166,6 +166,50 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                         <TimelineStep icon={<CalendarIcon />} title="En tránsito (Compras)" value={new Date(delivery.expectedDate).toLocaleDateString('es-ES')} isCompleted={true} />
                         <TimelineStep icon={<TruckIcon />} title="En almacén (Almacén)" value={delivery.arrival ? new Date(delivery.arrival).toLocaleString('es-ES') : null} isCompleted={delivery.status !== 'En tránsito'} />
                         <TimelineStep icon={<CheckCircleIcon />} title="Dado de Alta" value={null} isCompleted={delivery.status === 'Dado de alta'} isLast={true} />
+                    </div>
+
+                    {/* Fotos de incidencias: visibles también en historial (solo lectura) */}
+                    <div className="p-4 border border-[--color-border-subtle] rounded-[--radius-lg] space-y-4">
+                        <div className="flex items-center gap-2">
+                            <CameraIcon className="w-5 h-5 text-[--color-primary]" />
+                            <h3 className="font-semibold">Fotos de Incidencias</h3>
+                            {photos.length > 0 && (
+                                <span className="ml-auto text-xs bg-[--color-primary]/10 text-[--color-primary] px-2 py-1 rounded-full font-medium">
+                                    {photos.length} foto{photos.length !== 1 ? 's' : ''}
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-xs text-[--color-text-muted]">Pulsa una foto para verla en grande.</p>
+
+                        {isHistory ? (
+                            <PhotoGallery
+                                photos={photos}
+                                canDelete={false}
+                                emptyMessage="No hay fotos de incidencias en este registro"
+                            />
+                        ) : isWarehouseUser && (delivery.status === 'En tránsito' || delivery.status === 'En almacén') ? (
+                            <PhotoUploader
+                                deliveryId={delivery.id}
+                                userId={userId}
+                                userDisplayName={userDisplayName}
+                                photos={photos}
+                                onPhotoUploaded={(photo) => setPhotos(prev => [...prev, photo])}
+                                onPhotoDeleted={(photo) => setPhotos(prev => prev.filter(p => p.id !== photo.id))}
+                            />
+                        ) : (
+                            <PhotoGallery
+                                photos={photos}
+                                canDelete={isWarehouseUser}
+                                onDeletePhoto={async (photo) => {
+                                    await deleteDeliveryPhoto(delivery.id, photo);
+                                    setPhotos(prev => prev.filter(p => p.id !== photo.id));
+                                    await onUpdateDelivery({
+                                        ...delivery,
+                                        photos: photos.filter(p => p.id !== photo.id)
+                                    });
+                                }}
+                            />
+                        )}
                     </div>
 
                     {/* Información de compras (solo lectura para todos) */}
@@ -316,49 +360,6 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                             </div>
                         </>
                     )}
-
-                    {/* Fotos de incidencias: visibles también en historial (solo lectura) */}
-                    <div className="p-4 border border-[--color-border-subtle] rounded-[--radius-lg] space-y-4">
-                        <div className="flex items-center gap-2">
-                            <CameraIcon className="w-5 h-5 text-[--color-primary]" />
-                            <h3 className="font-semibold">Fotos de Incidencias</h3>
-                            {photos.length > 0 && (
-                                <span className="ml-auto text-xs bg-[--color-primary]/10 text-[--color-primary] px-2 py-1 rounded-full font-medium">
-                                    {photos.length} foto{photos.length !== 1 ? 's' : ''}
-                                </span>
-                            )}
-                        </div>
-
-                        {isHistory ? (
-                            <PhotoGallery
-                                photos={photos}
-                                canDelete={false}
-                                emptyMessage="No hay fotos de incidencias en este registro"
-                            />
-                        ) : isWarehouseUser && (delivery.status === 'En tránsito' || delivery.status === 'En almacén') ? (
-                            <PhotoUploader
-                                deliveryId={delivery.id}
-                                userId={userId}
-                                userDisplayName={userDisplayName}
-                                photos={photos}
-                                onPhotoUploaded={(photo) => setPhotos(prev => [...prev, photo])}
-                                onPhotoDeleted={(photo) => setPhotos(prev => prev.filter(p => p.id !== photo.id))}
-                            />
-                        ) : (
-                            <PhotoGallery
-                                photos={photos}
-                                canDelete={isWarehouseUser}
-                                onDeletePhoto={async (photo) => {
-                                    await deleteDeliveryPhoto(delivery.id, photo);
-                                    setPhotos(prev => prev.filter(p => p.id !== photo.id));
-                                    await onUpdateDelivery({
-                                        ...delivery,
-                                        photos: photos.filter(p => p.id !== photo.id)
-                                    });
-                                }}
-                            />
-                        )}
-                    </div>
                 </div>
             </div>
             {confirmAction === 'alta' && (

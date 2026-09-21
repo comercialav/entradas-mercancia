@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import type { Delivery, UserRole, IslandCode } from '../../../types';
 import { StatusBadge } from './StatusBadge';
 import { EyeIcon, TrashIcon, ChevronDownIcon } from '../../ui/Icons';
+import { PhotoGallery } from '../../ui/PhotoGallery';
 
 interface DeliveryTableProps {
     deliveries: Delivery[];
@@ -142,6 +143,14 @@ const MobileCard: React.FC<MobileCardProps> = ({ delivery, onSelect, isHistory, 
                             <div>
                                 <p className="text-[10px] uppercase font-semibold text-[--color-text-muted]">Observaciones</p>
                                 <p className="text-[--color-text-primary]">{delivery.observations}</p>
+                            </div>
+                        )}
+
+                        {delivery.photos && delivery.photos.length > 0 && (
+                            <div>
+                                <p className="text-[10px] uppercase font-semibold text-[--color-text-muted]">Fotos de incidencias</p>
+                                <p className="mt-1 mb-2 text-xs text-[--color-text-muted]">Pulsa una foto para verla en grande.</p>
+                                <PhotoGallery photos={delivery.photos} canDelete={false} />
                             </div>
                         )}
                     </div>
@@ -297,11 +306,12 @@ const TableRow: React.FC<TableRowProps> = ({ delivery, onSelect, isHistory, isEx
                                 </div>
                             )}
                             {delivery.photos && delivery.photos.length > 0 && (
-                                <div>
+                                <div className="md:col-span-3">
                                     <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Fotos de incidencias</p>
-                                    <p className="mt-1 text-[--color-primary] font-medium">
-                                        📷 {delivery.photos.length} foto{delivery.photos.length !== 1 ? 's' : ''}
-                                    </p>
+                                    <p className="mt-1 mb-2 text-xs text-[--color-text-muted]">Pulsa una foto para verla en grande.</p>
+                                    <div className="max-w-md">
+                                        <PhotoGallery photos={delivery.photos} canDelete={false} />
+                                    </div>
                                 </div>
                             )}
                         </div>
