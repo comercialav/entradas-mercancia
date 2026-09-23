@@ -119,11 +119,11 @@ function resolveRecipients(action: NotifyAction, payload: NotificationPayload) {
                 WAREHOUSE_EMAIL[payload.island] ?? 'almacen@comercialav.com'
             ];
         case 'SHIPMENT_ARRIVED':
-            return ['compras@comercialav.com'];
+            return ['compras@av-online.es'];
         case 'SHIPMENT_REGISTERED':
-            return ['compras@comercialav.com', NOTIFY_EMAILS[payload.island]];
+            return ['compras@av-online.es', NOTIFY_EMAILS[payload.island]];
         default:
-            return ['compras@comercialav.com'];
+            return ['compras@av-online.es'];
     }
 }
 

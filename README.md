@@ -51,10 +51,10 @@ View your app in AI Studio: https://ai.studio/apps/drive/1YPbXdkbAG7liingjNgYfXv
    ```
    firebase functions:config:set mail.host="smtp.ionos.es" \
      mail.port="465" \
-     mail.user="entregas.mercancia@comercialav.com" \
-     mail.pass="$W2tissU_CAV2025" \
-     mail.from="entregas.mercancia@comercialav.com" \
-     mail.reply_to="entregas.mercancia@comercialav.com"
+     mail.user="no-responder@av-online.es" \
+     mail.pass="CONTRASEÑA_DEL_BUZON" \
+     mail.from="no-responder@av-online.es" \
+     mail.reply_to="no-responder@av-online.es"
    ```
    > Ajusta los valores según tu proveedor. No expongas estas claves en el frontend.
 
