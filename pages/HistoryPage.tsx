@@ -11,9 +11,10 @@ interface HistoryPageProps {
     userRole: UserRole;
     userId: string;
     userDisplayName?: string;
+    onUpdateDelivery: (delivery: Delivery) => Promise<void>;
 }
 
-export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole, userId, userDisplayName }) => {
+export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole, userId, userDisplayName, onUpdateDelivery }) => {
 
     const [selectedDelivery, setSelectedDelivery] = useState<Delivery | null>(null);
     const [supplierFilter, setSupplierFilter] = useState('');
@@ -146,7 +147,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole, 
                 <SlideOverPanel
                     delivery={selectedDelivery}
                     onClose={() => setSelectedDelivery(null)}
-                    onUpdateDelivery={async () => { }} // No updates in history
+                    onUpdateDelivery={onUpdateDelivery}
                     userRole={userRole}
                     isHistory={true}
                     userId={userId}

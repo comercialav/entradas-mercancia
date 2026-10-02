@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import type { Delivery, UserRole, IslandCode } from '../../../types';
-import { StatusBadge } from './StatusBadge';
+import { StatusBadge, IncidentBadge } from './StatusBadge';
 import { EyeIcon, TrashIcon, ChevronDownIcon } from '../../ui/Icons';
 import { PhotoGallery } from '../../ui/PhotoGallery';
 
@@ -27,6 +27,7 @@ const TableHeader: React.FC = () => (
             <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-[--color-text-secondary] uppercase tracking-wider">Palets</th>
             <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-[--color-text-secondary] uppercase tracking-wider">Bultos</th>
             <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-[--color-text-secondary] uppercase tracking-wider">Estado</th>
+            <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-[--color-text-secondary] uppercase tracking-wider">Incidencia</th>
             <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-[--color-text-secondary] uppercase tracking-wider">Última Actualización</th>
             <th scope="col" className="py-3 px-6 text-left text-xs font-medium text-[--color-text-secondary] uppercase tracking-wider">Acciones</th>
         </tr>
@@ -93,6 +94,7 @@ const MobileCard: React.FC<MobileCardProps> = ({ delivery, onSelect, isHistory, 
                     {delivery.photos && delivery.photos.length > 0 && (
                         <span className="text-[--color-primary]">📷 {delivery.photos.length}</span>
                     )}
+                    <IncidentBadge delivery={delivery} />
                 </div>
             </div>
 
@@ -143,6 +145,19 @@ const MobileCard: React.FC<MobileCardProps> = ({ delivery, onSelect, isHistory, 
                             <div>
                                 <p className="text-[10px] uppercase font-semibold text-[--color-text-muted]">Observaciones</p>
                                 <p className="text-[--color-text-primary]">{delivery.observations}</p>
+                            </div>
+                        )}
+
+                        {delivery.hasIncident != null && (
+                            <div>
+                                <p className="text-[10px] uppercase font-semibold text-[--color-text-muted]">Incidencia</p>
+                                <div className="mt-1"><IncidentBadge delivery={delivery} /></div>
+                                {delivery.incidentDescription?.trim() && (
+                                    <p className="mt-1 text-[--color-text-primary]">{delivery.incidentDescription}</p>
+                                )}
+                                {delivery.incidentSolution?.trim() && (
+                                    <p className="mt-1 text-[--color-text-primary]">Solución: {delivery.incidentSolution}</p>
+                                )}
                             </div>
                         )}
 
@@ -214,6 +229,11 @@ const TableRow: React.FC<TableRowProps> = ({ delivery, onSelect, isHistory, isEx
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-[--color-text-secondary]">{delivery.pallets ?? <span className="text-[--color-text-muted]">--</span>}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-[--color-text-secondary]">{delivery.packages ?? <span className="text-[--color-text-muted]">--</span>}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm"><StatusBadge status={delivery.status} /></td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {delivery.hasIncident == null
+                        ? <span className="text-[--color-text-muted]">—</span>
+                        : <IncidentBadge delivery={delivery} />}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-[--color-text-secondary]">{formatDateTime(delivery.lastUpdate)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center gap-3">
@@ -247,7 +267,7 @@ const TableRow: React.FC<TableRowProps> = ({ delivery, onSelect, isHistory, isEx
             </tr>
             {isExpanded && (
                 <tr className="bg-[#F8FAFF] border-b border-[--color-border-subtle]">
-                    <td colSpan={8} className="px-6 py-4 text-sm text-[--color-text-secondary]">
+                    <td colSpan={9} className="px-6 py-4 text-sm text-[--color-text-secondary]">
                         <div className="grid gap-4 md:grid-cols-3">
                             <div className="md:col-span-2">
                                 <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Notas</p>
@@ -303,6 +323,19 @@ const TableRow: React.FC<TableRowProps> = ({ delivery, onSelect, isHistory, isEx
                                 <div>
                                     <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Transporte</p>
                                     <p className="mt-1 text-[--color-text-primary]">{delivery.transportCompany}</p>
+                                </div>
+                            )}
+                            {delivery.hasIncident != null && (
+                                <div className="md:col-span-3">
+                                    <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Detalle de incidencia</p>
+                                    <p className="mt-1 text-[--color-text-primary]">
+                                        {delivery.hasIncident
+                                            ? (delivery.incidentDescription?.trim() || 'Sin descripción.')
+                                            : 'Sin incidencia.'}
+                                    </p>
+                                    {delivery.incidentSolution?.trim() && (
+                                        <p className="mt-1 text-[--color-text-primary]">Solución: {delivery.incidentSolution}</p>
+                                    )}
                                 </div>
                             )}
                             {delivery.photos && delivery.photos.length > 0 && (

@@ -213,7 +213,8 @@ const App: React.FC = () => {
         if (!authUser) {
             throw new Error('Usuario no autenticado');
         }
-        const previousDelivery = deliveries.find((delivery) => delivery.id === updatedDelivery.id);
+        const previousDelivery = deliveries.find((delivery) => delivery.id === updatedDelivery.id)
+            ?? archivedDeliveries.find((delivery) => delivery.id === updatedDelivery.id);
         await updateShipmentFromDelivery(updatedDelivery, {
             userId: authUser.uid,
             userDisplayName: userName ?? authUser.email ?? 'Usuario',
@@ -221,7 +222,7 @@ const App: React.FC = () => {
         const prevStatus = previousDelivery?.status;
         const nextStatus = updatedDelivery.status;
 
-        const statusChanged = prevStatus !== nextStatus;
+        const statusChanged = previousDelivery != null && prevStatus !== nextStatus;
         showToast('Entrega actualizada');
         if (statusChanged) {
             let action: NotificationAction | null = null;
@@ -250,7 +251,7 @@ const App: React.FC = () => {
                 });
             }
         }
-    }, [authUser, userName, deliveries, triggerNotification, updatedByLabel, showToast]);
+    }, [authUser, userName, deliveries, archivedDeliveries, triggerNotification, updatedByLabel, showToast]);
 
     const deleteDelivery = useCallback(async (delivery: Delivery) => {
         if (!authUser) {
@@ -317,6 +318,7 @@ const App: React.FC = () => {
                                 userRole={userRole}
                                 userId={authUser?.uid ?? ''}
                                 userDisplayName={userName}
+                                onUpdateDelivery={updateDelivery}
                             />
                         )}
                     </div>

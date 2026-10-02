@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { Delivery, UserRole, DeliveryStatus, DeliveryPhoto } from '../../../types';
+import { getIncidentState } from '../../../types';
 import { CloseIcon, CalendarIcon, TruckIcon, CheckCircleIcon, CameraIcon } from '../../ui/Icons';
-import { StatusBadge } from './StatusBadge';
+import { IncidentBadge, StatusBadge } from './StatusBadge';
 import { ConfirmationDialog } from '../../ui/ConfirmationDialog';
 import { CustomNumberInput } from '../../ui/CustomNumberInput';
 import { PhotoUploader } from '../../ui/PhotoUploader';
@@ -49,6 +50,12 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [photos, setPhotos] = useState<DeliveryPhoto[]>(delivery.photos ?? []);
+    const [incidentAnswer, setIncidentAnswer] = useState<'si' | 'no' | ''>(
+        delivery.hasIncident === true ? 'si' : delivery.hasIncident === false ? 'no' : ''
+    );
+    const [incidentDescription, setIncidentDescription] = useState(delivery.incidentDescription ?? '');
+    const [incidentSolution, setIncidentSolution] = useState('');
+    const [isResolvingIncident, setIsResolvingIncident] = useState(false);
 
 
     // Actualizar estados cuando cambie el delivery
@@ -61,6 +68,9 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
         setNotes(delivery.notes ?? '');
         setTransportCompany(delivery.transportCompany ?? '');
         setPhotos(delivery.photos ?? []);
+        setIncidentAnswer(delivery.hasIncident === true ? 'si' : delivery.hasIncident === false ? 'no' : '');
+        setIncidentDescription(delivery.incidentDescription ?? '');
+        setIncidentSolution('');
         setError(null);
     }, [delivery.id, delivery.photos]);
 
@@ -82,6 +92,14 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                 setError('El número de bultos es obligatorio.');
                 return;
             }
+            if (!incidentAnswer) {
+                setError('Indica si hay incidencia: Sí o No.');
+                return;
+            }
+            if (incidentAnswer === 'si' && !incidentDescription.trim()) {
+                setError('Describe la incidencia.');
+                return;
+            }
         }
 
         setIsSavingWarehouse(true);
@@ -94,7 +112,14 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                 pallets: pallets !== '' ? Number(pallets) : null,
                 packages: packages !== '' ? Number(packages) : null,
                 observations: observations.trim() || null,
-                status: nextStatus
+                status: nextStatus,
+                ...(canRegister ? {
+                    hasIncident: incidentAnswer === 'si',
+                    incidentDescription: incidentAnswer === 'si' ? incidentDescription.trim() : null,
+                    incidentSolution: null,
+                    incidentResolvedAt: null,
+                    incidentResolvedByName: null,
+                } : {}),
             });
             console.info('[slideOver] Datos guardados correctamente');
             onClose();
@@ -144,8 +169,40 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
         }
     };
 
+    const handleResolveIncident = async () => {
+        setError(null);
+        if (!incidentSolution.trim()) {
+            setError('Escribe la solución de la incidencia.');
+            return;
+        }
+        setIsResolvingIncident(true);
+        try {
+            await onUpdateDelivery({
+                ...delivery,
+                incidentSolution: incidentSolution.trim(),
+                incidentResolvedAt: new Date().toISOString(),
+                incidentResolvedByName: userDisplayName ?? null,
+            });
+            onClose();
+        } catch (err) {
+            console.error(err);
+            setError('No se pudo marcar la incidencia como solucionada.');
+        } finally {
+            setIsResolvingIncident(false);
+        }
+    };
+
     const isWarehouseUser = userRole === 'Almacén';
     const canRegister = isWarehouseUser && delivery.status === 'En tránsito';
+    const incidentPreview = getIncidentState({
+        hasIncident: canRegister ? (incidentAnswer === '' ? null : incidentAnswer === 'si') : delivery.hasIncident,
+        incidentSolution: canRegister ? null : delivery.incidentSolution,
+    });
+    const incidentBoxClass = incidentPreview === 'open'
+        ? 'border-red-300 bg-red-50'
+        : incidentPreview === 'unset'
+            ? 'border-[--color-border-subtle] bg-white'
+            : 'border-emerald-300 bg-emerald-50';
 
     return (
         <div className="fixed inset-0 z-40">
@@ -167,6 +224,97 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                         <TimelineStep icon={<TruckIcon />} title="En almacén (Almacén)" value={delivery.arrival ? new Date(delivery.arrival).toLocaleString('es-ES') : null} isCompleted={delivery.status !== 'En tránsito'} />
                         <TimelineStep icon={<CheckCircleIcon />} title="Dado de Alta" value={null} isCompleted={delivery.status === 'Dado de alta'} isLast={true} />
                     </div>
+
+                    {(canRegister || getIncidentState(delivery) !== 'unset') && (
+                        <div className={`p-4 border rounded-[--radius-lg] space-y-3 ${incidentBoxClass}`}>
+                            <div className="flex items-center justify-between gap-2">
+                                <h3 className="font-semibold">Incidencia</h3>
+                                {!canRegister && <IncidentBadge delivery={delivery} />}
+                            </div>
+
+                            {canRegister ? (
+                                <>
+                                    <p className="text-sm text-[--color-text-secondary]">
+                                        ¿Hay incidencia? <span className="text-[--color-error]">*</span>
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIncidentAnswer('no')}
+                                            className={`flex-1 py-2 rounded-[--radius-md] font-semibold border ${incidentAnswer === 'no' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-[--color-text-secondary] border-[--color-border-strong]'}`}
+                                        >
+                                            No
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIncidentAnswer('si')}
+                                            className={`flex-1 py-2 rounded-[--radius-md] font-semibold border ${incidentAnswer === 'si' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-[--color-text-secondary] border-[--color-border-strong]'}`}
+                                        >
+                                            Sí
+                                        </button>
+                                    </div>
+                                    {incidentAnswer === 'si' && (
+                                        <div>
+                                            <label className="text-sm font-medium text-[--color-text-secondary]">
+                                                ¿Qué incidencia es? <span className="text-[--color-error]">*</span>
+                                            </label>
+                                            <textarea
+                                                value={incidentDescription}
+                                                onChange={(e) => setIncidentDescription(e.target.value)}
+                                                rows={3}
+                                                placeholder="Describe la incidencia"
+                                                className="mt-1 w-full border border-[--color-border-strong] rounded-[--radius-md] p-2 bg-white"
+                                            />
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    {delivery.hasIncident && (
+                                        <div>
+                                            <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Qué ha pasado</p>
+                                            <p className="text-sm text-[--color-text-primary]">{delivery.incidentDescription?.trim() || 'Sin descripción.'}</p>
+                                        </div>
+                                    )}
+                                    {delivery.incidentSolution?.trim() && (
+                                        <div>
+                                            <p className="text-xs uppercase font-semibold text-[--color-text-muted]">Solución</p>
+                                            <p className="text-sm text-[--color-text-primary]">{delivery.incidentSolution}</p>
+                                            {delivery.incidentResolvedByName && (
+                                                <p className="text-xs text-[--color-text-muted] mt-1">
+                                                    {delivery.incidentResolvedByName}
+                                                    {delivery.incidentResolvedAt ? ` · ${new Date(delivery.incidentResolvedAt).toLocaleString('es-ES')}` : ''}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                    {userRole === 'Compras' && getIncidentState(delivery) === 'open' && (
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-[--color-text-secondary]">
+                                                Solución <span className="text-[--color-error]">*</span>
+                                            </label>
+                                            <textarea
+                                                value={incidentSolution}
+                                                onChange={(e) => setIncidentSolution(e.target.value)}
+                                                rows={3}
+                                                placeholder="Escribe cómo se ha solucionado"
+                                                className="mt-1 w-full border border-[--color-border-strong] rounded-[--radius-md] p-2 bg-white"
+                                            />
+                                            {error && <p className="text-sm text-[--color-error]">{error}</p>}
+                                            <button
+                                                type="button"
+                                                onClick={handleResolveIncident}
+                                                disabled={isResolvingIncident}
+                                                className="w-full py-2 px-4 bg-emerald-600 text-white font-semibold rounded-[--radius-md] hover:bg-emerald-700 disabled:opacity-60"
+                                            >
+                                                {isResolvingIncident ? 'Guardando...' : 'Solucionar incidencia'}
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
 
                     {/* Fotos de incidencias: visibles también en historial (solo lectura) */}
                     <div className="p-4 border border-[--color-border-subtle] rounded-[--radius-lg] space-y-4">

@@ -78,6 +78,11 @@ const docToDelivery = (docSnap: QueryDocumentSnapshot<DocumentData>): Delivery =
         estimatedPackages: data.estimatedPackages != null && data.estimatedPackages !== undefined ? data.estimatedPackages : null,
         transportCompany: data.transportCompany ?? null,
         photos: Array.isArray(data.photos) ? data.photos : [],
+        hasIncident: typeof data.hasIncident === 'boolean' ? data.hasIncident : null,
+        incidentDescription: data.incidentDescription ?? null,
+        incidentSolution: data.incidentSolution ?? null,
+        incidentResolvedAt: timestampToISO(data.incidentResolvedAt),
+        incidentResolvedByName: data.incidentResolvedByName ?? null,
     };
 };
 
@@ -176,6 +181,11 @@ export const createShipment = async ({
         registeredByUserId: null,
         archived: false,
         archivedAt: null,
+        hasIncident: null,
+        incidentDescription: null,
+        incidentSolution: null,
+        incidentResolvedAt: null,
+        incidentResolvedByName: null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
     };
@@ -199,6 +209,11 @@ export const updateShipmentFromDelivery = async (
         observations: delivery.observations ?? null,
         island: delivery.island,
         transportCompany: delivery.transportCompany ?? null,
+        hasIncident: delivery.hasIncident ?? null,
+        incidentDescription: delivery.incidentDescription?.trim() || null,
+        incidentSolution: delivery.incidentSolution?.trim() || null,
+        incidentResolvedAt: delivery.incidentResolvedAt ? Timestamp.fromDate(new Date(delivery.incidentResolvedAt)) : null,
+        incidentResolvedByName: delivery.incidentResolvedByName ?? null,
     };
 
     if (firestoreStatus === 'ARRIVED') {

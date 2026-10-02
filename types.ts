@@ -31,4 +31,23 @@ export interface Delivery {
     estimatedPackages?: number | null;
     transportCompany?: string | null;
     photos?: DeliveryPhoto[];
+    hasIncident?: boolean | null;
+    incidentDescription?: string | null;
+    incidentSolution?: string | null;
+    incidentResolvedAt?: string | null;
+    incidentResolvedByName?: string | null;
 }
+
+export type IncidentState = 'unset' | 'open' | 'none' | 'resolved';
+
+export const getIncidentState = (
+    delivery: Pick<Delivery, 'hasIncident' | 'incidentSolution'>
+): IncidentState => {
+    if (delivery.hasIncident === true) {
+        return delivery.incidentSolution?.trim() ? 'resolved' : 'open';
+    }
+    if (delivery.hasIncident === false) {
+        return 'none';
+    }
+    return 'unset';
+};
