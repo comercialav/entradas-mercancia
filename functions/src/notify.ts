@@ -22,8 +22,8 @@ export interface NotificationPayload {
 }
 
 const WAREHOUSE_EMAIL: Record<IslandCode, string> = {
-    GC: 'almacen.gc@comercialav.com',
-    TF: 'almacen.tf@comercialav.com',
+    GC: 'almacen.gc@av-online.es',
+    TF: 'almacen.tf@av-online.es',
 };
 
 const NOTIFY_EMAILS: Record<IslandCode, string> = {
@@ -116,7 +116,7 @@ function resolveRecipients(action: NotifyAction, payload: NotificationPayload) {
     switch (action) {
         case 'SHIPMENT_CREATED':
             return [
-                WAREHOUSE_EMAIL[payload.island] ?? 'almacen@comercialav.com'
+                WAREHOUSE_EMAIL[payload.island] ?? 'almacen@av-online.es'
             ];
         case 'SHIPMENT_ARRIVED':
             return ['compras@av-online.es'];
