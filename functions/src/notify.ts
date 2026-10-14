@@ -46,6 +46,7 @@ const ACTION_DESCRIPTIONS: Record<NotifyAction, string> = {
 function formatDate(value?: string | null) {
     if (!value) return '—';
     return new Date(value).toLocaleString('es-ES', {
+        timeZone: 'Atlantic/Canary',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',

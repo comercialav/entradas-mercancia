@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CloseIcon, ImageIcon, TrashIcon } from './Icons';
 import type { DeliveryPhoto } from '../../types';
+import { formatCanaryDateTime } from '../../utils/canaryTime';
 
 interface PhotoGalleryProps {
     photos: DeliveryPhoto[];
@@ -10,15 +11,7 @@ interface PhotoGalleryProps {
     canDelete?: boolean;
 }
 
-const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
+const formatDate = (dateString: string) => formatCanaryDateTime(dateString);
 
 export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
     photos,

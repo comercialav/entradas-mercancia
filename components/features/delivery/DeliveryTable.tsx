@@ -4,6 +4,7 @@ import type { Delivery, UserRole, IslandCode } from '../../../types';
 import { StatusBadge, IncidentBadge } from './StatusBadge';
 import { EyeIcon, TrashIcon, ChevronDownIcon } from '../../ui/Icons';
 import { PhotoGallery } from '../../ui/PhotoGallery';
+import { formatCanaryDate, formatCanaryDateTime } from '../../../utils/canaryTime';
 
 interface DeliveryTableProps {
     deliveries: Delivery[];
@@ -36,12 +37,12 @@ const TableHeader: React.FC = () => (
 
 const formatDate = (dateString: string | null) => {
     if (!dateString) return <span className="text-[--color-text-muted]">--</span>;
-    return new Date(dateString).toLocaleDateString('es-ES');
+    return formatCanaryDate(dateString);
 };
 
 const formatDateTime = (dateString: string | null) => {
     if (!dateString) return <span className="text-[--color-text-muted]">--</span>;
-    return new Date(dateString).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return formatCanaryDateTime(dateString);
 };
 
 // ================== MOBILE CARD COMPONENT ==================

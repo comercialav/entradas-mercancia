@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore';
 import type { Delivery, DeliveryStatus, UserRole, IslandCode, DeliveryPhoto } from '../types';
 import { db } from '../firebase';
+import { fromCanaryDateTimeLocal } from '../utils/canaryTime';
 
 export type FirestoreRole = 'compras' | 'almacen' | 'admin';
 
@@ -93,7 +94,7 @@ const dateFromInput = (date: string) => {
     if (!date) {
         return new Date();
     }
-    return new Date(`${date}T00:00:00`);
+    return new Date(fromCanaryDateTimeLocal(`${date}T00:00`));
 };
 
 export const listenToShipments = (

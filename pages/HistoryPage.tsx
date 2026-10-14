@@ -5,6 +5,7 @@ import { FilterIcon, EmptyBoxIcon } from '../components/ui/Icons';
 import { DeliveryTable } from '../components/features/delivery/DeliveryTable';
 import { SlideOverPanel } from '../components/features/delivery/SlideOverPanel';
 import { STATUS_OPTIONS } from '../constants';
+import { addCalendarDays, canaryDateKey, canaryTodayKey } from '../utils/canaryTime';
 
 interface HistoryPageProps {
     deliveries: Delivery[];
@@ -31,7 +32,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole, 
             .filter(d => {
                 const dateValue = d.arrival ?? d.expectedDate;
                 if (!dateValue) return false;
-                const dateOnly = dateValue.slice(0, 10);
+                const dateOnly = canaryDateKey(dateValue);
                 if (dateFrom && dateOnly < dateFrom) return false;
                 if (dateTo && dateOnly > dateTo) return false;
                 return true;
@@ -89,11 +90,9 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole, 
                             <button
                                 type="button"
                                 onClick={() => {
-                                    const today = new Date();
-                                    const lastWeek = new Date(today);
-                                    lastWeek.setDate(today.getDate() - 7);
-                                    setDateFrom(lastWeek.toISOString().slice(0, 10));
-                                    setDateTo(today.toISOString().slice(0, 10));
+                                    const today = canaryTodayKey();
+                                    setDateFrom(addCalendarDays(today, -7));
+                                    setDateTo(today);
                                 }}
                                 className="px-2 py-1 border border-[--color-border-strong] rounded-[--radius-pill] hover:bg-gray-100"
                             >
@@ -102,10 +101,9 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({ deliveries, userRole, 
                             <button
                                 type="button"
                                 onClick={() => {
-                                    const today = new Date();
-                                    const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-                                    setDateFrom(firstDay.toISOString().slice(0, 10));
-                                    setDateTo(today.toISOString().slice(0, 10));
+                                    const today = canaryTodayKey();
+                                    setDateFrom(addCalendarDays(today, -30));
+                                    setDateTo(today);
                                 }}
                                 className="px-2 py-1 border border-[--color-border-strong] rounded-[--radius-pill] hover:bg-gray-100"
                             >

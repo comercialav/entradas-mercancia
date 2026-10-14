@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { CameraIcon, UploadIcon, XCircleIcon, CloseIcon } from './Icons';
 import type { DeliveryPhoto } from '../../types';
 import { uploadDeliveryPhoto, deleteDeliveryPhoto } from '../../services/storageService';
+import { formatCanaryDateTime } from '../../utils/canaryTime';
 
 interface PhotoUploaderProps {
     deliveryId: string;
@@ -235,13 +236,7 @@ export const PhotoUploader: React.FC<PhotoUploaderProps> = ({
                                 <span className="font-medium">{selectedPhoto.uploadedByName || 'Usuario'}</span>
                                 <span className="mx-2">•</span>
                                 <span className="text-gray-300">
-                                    {new Date(selectedPhoto.uploadedAt).toLocaleDateString('es-ES', {
-                                        day: '2-digit',
-                                        month: '2-digit',
-                                        year: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                    })}
+                                    {formatCanaryDateTime(selectedPhoto.uploadedAt)}
                                 </span>
                             </p>
                         </div>

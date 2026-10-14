@@ -8,6 +8,7 @@ import { CustomNumberInput } from '../../ui/CustomNumberInput';
 import { PhotoUploader } from '../../ui/PhotoUploader';
 import { PhotoGallery } from '../../ui/PhotoGallery';
 import { deleteDeliveryPhoto } from '../../../services/storageService';
+import { formatCanaryDate, formatCanaryDateTime, fromCanaryDateTimeLocal, toCanaryDateTimeLocal } from '../../../utils/canaryTime';
 
 
 interface SlideOverPanelProps {
@@ -37,7 +38,7 @@ const TimelineStep: React.FC<{ icon: React.ReactNode, title: string, value: stri
 );
 
 export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClose, onUpdateDelivery, userRole, isHistory, userId, userDisplayName }) => {
-    const [arrival, setArrival] = useState(delivery.arrival ? delivery.arrival.substring(0, 16) : '');
+    const [arrival, setArrival] = useState(toCanaryDateTimeLocal(delivery.arrival));
     const [pallets, setPallets] = useState(delivery.pallets?.toString() ?? '');
     const [packages, setPackages] = useState(delivery.packages?.toString() ?? '');
     const [observations, setObservations] = useState(delivery.observations ?? '');
@@ -60,7 +61,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
 
     // Actualizar estados cuando cambie el delivery
     useEffect(() => {
-        setArrival(delivery.arrival ? delivery.arrival.substring(0, 16) : '');
+        setArrival(toCanaryDateTimeLocal(delivery.arrival));
         setPallets(delivery.pallets?.toString() ?? '');
         setPackages(delivery.packages?.toString() ?? '');
         setObservations(delivery.observations ?? '');
@@ -108,7 +109,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
             const nextStatus = canRegister ? 'En almacén' : delivery.status;
             await onUpdateDelivery({
                 ...delivery,
-                arrival: arrival ? new Date(arrival).toISOString() : null,
+                arrival: arrival ? fromCanaryDateTimeLocal(arrival) : null,
                 pallets: pallets !== '' ? Number(pallets) : null,
                 packages: packages !== '' ? Number(packages) : null,
                 observations: observations.trim() || null,
@@ -220,8 +221,8 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                 <div className="flex-1 overflow-y-auto p-6 space-y-8">
                     {/* Timeline */}
                     <div>
-                        <TimelineStep icon={<CalendarIcon />} title="En tránsito (Compras)" value={new Date(delivery.expectedDate).toLocaleDateString('es-ES')} isCompleted={true} />
-                        <TimelineStep icon={<TruckIcon />} title="En almacén (Almacén)" value={delivery.arrival ? new Date(delivery.arrival).toLocaleString('es-ES') : null} isCompleted={delivery.status !== 'En tránsito'} />
+                        <TimelineStep icon={<CalendarIcon />} title="En tránsito (Compras)" value={formatCanaryDate(delivery.expectedDate)} isCompleted={true} />
+                        <TimelineStep icon={<TruckIcon />} title="En almacén (Almacén)" value={delivery.arrival ? formatCanaryDateTime(delivery.arrival) : null} isCompleted={delivery.status !== 'En tránsito'} />
                         <TimelineStep icon={<CheckCircleIcon />} title="Dado de Alta" value={null} isCompleted={delivery.status === 'Dado de alta'} isLast={true} />
                     </div>
 
@@ -283,7 +284,7 @@ export const SlideOverPanel: React.FC<SlideOverPanelProps> = ({ delivery, onClos
                                             {delivery.incidentResolvedByName && (
                                                 <p className="text-xs text-[--color-text-muted] mt-1">
                                                     {delivery.incidentResolvedByName}
-                                                    {delivery.incidentResolvedAt ? ` · ${new Date(delivery.incidentResolvedAt).toLocaleString('es-ES')}` : ''}
+                                                    {delivery.incidentResolvedAt ? ` · ${formatCanaryDateTime(delivery.incidentResolvedAt)}` : ''}
                                                 </p>
                                             )}
                                         </div>
